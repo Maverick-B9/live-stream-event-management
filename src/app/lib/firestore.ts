@@ -429,11 +429,11 @@ export async function seedSettingsIfMissing() {
   const snap = await getDoc(doc(db, 'settings', 'global'));
   if (!snap.exists()) {
     await setDoc(doc(db, 'settings', 'global'), {
-      eventName: 'Mahadasara Sports 2026',
+      eventName: 'Mahadasara 2026',
       eventLogoUrl: '',
       primaryColor: '#0F172A',
       secondaryColor: '#F59E0B',
-      globalTickerHeadlines: ['Welcome to Mahadasara Sports 2026!'],
+      globalTickerHeadlines: ['Welcome to Mahadasara 2026!'],
       globalTickerSpeed: 50,
       globalTickerPaused: false,
       activeStreamEventId: null,

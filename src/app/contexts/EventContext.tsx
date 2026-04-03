@@ -31,11 +31,11 @@ import { storage } from '../../lib/firebase';
 // Default branding (used before Firestore loads)
 // ──────────────────────────────────────────────────────────────
 const DEFAULT_BRANDING: GlobalSettings = {
-  eventName: 'Mahadasara Sports 2026',
+  eventName: 'Mahadasara 2026',
   eventLogoUrl: '/logos/event/logo.jpg',
   primaryColor: '#0F172A',
   secondaryColor: '#F59E0B',
-  globalTickerHeadlines: ['Welcome to Mahadasara Sports 2026!'],
+  globalTickerHeadlines: ['Welcome to Mahadasara 2026!'],
   globalTickerSpeed: 50,
   globalTickerPaused: false,
   activeStreamEventId: null,
