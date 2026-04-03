@@ -289,8 +289,8 @@ export default function PublicDisplayView() {
               <CountdownWidget match={soonMatch} franchiseA={soonFranchiseA} franchiseB={soonFranchiseB} />
             </div>
           ) : (
-            <div className="flex-1 flex w-full h-full">
-              <div className={`relative h-full transition-all duration-500 ease-in-out ${activeMatch && activeFranchiseA && activeFranchiseB ? 'w-3/4' : 'w-full'}`}>
+            <div className="flex-1 flex flex-col lg:flex-row w-full h-full">
+              <div className={`relative transition-all duration-500 ease-in-out ${activeMatch && activeFranchiseA && activeFranchiseB ? 'h-1/2 lg:h-full w-full lg:w-3/4 shrink-0' : 'h-full w-full'}`}>
                 <VideoPlayer
                   streamUrl={activeStreamUrl}
                   status={activeStreamUrl ? 'playing' : 'idle'}
@@ -299,10 +299,10 @@ export default function PublicDisplayView() {
               </div>
               {/* Score panel aligned perfectly next to the video */}
               {activeMatch && activeFranchiseA && activeFranchiseB && activeSport && (
-                <div className="w-1/4 h-full bg-gray-900 border-l border-gray-800 flex flex-col items-center justify-center px-6 overflow-y-auto shrink-0 relative shadow-2xl z-10 block">
-                  <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-black/50 to-transparent pointer-events-none" />
-                  <div className="w-full max-w-sm mt-8 space-y-6">
-                     <h2 className="text-xl font-bold text-center text-amber-400 uppercase tracking-widest break-words mb-2">Live Score</h2>
+                <div className="w-full lg:w-1/4 h-1/2 lg:h-full bg-gray-900 border-t lg:border-t-0 lg:border-l border-gray-800 flex flex-col items-center justify-center p-4 lg:px-6 overflow-y-auto shrink-0 relative shadow-2xl z-10 block">
+                  <div className="absolute top-0 left-0 right-0 h-16 lg:h-32 bg-gradient-to-b from-black/50 to-transparent pointer-events-none" />
+                  <div className="w-full max-w-sm mt-4 lg:mt-8 space-y-4 lg:space-y-6">
+                     <h2 className="text-lg lg:text-xl font-bold text-center text-amber-400 uppercase tracking-widest break-words mb-1 lg:mb-2">Live Score</h2>
                      <MatchCard
                         match={activeMatch}
                         franchiseA={activeFranchiseA}

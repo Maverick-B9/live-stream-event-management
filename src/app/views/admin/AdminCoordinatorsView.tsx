@@ -7,8 +7,8 @@ import { Input } from '../../components/ui/input';
 import { toast } from 'sonner';
 import { ArrowLeft, Plus, X, Edit2, Wifi, WifiOff } from 'lucide-react';
 import type { AppUser } from '../../types';
-import { addDoc, collection, onSnapshot, query, where } from 'firebase/firestore';
-import { db } from '../../../lib/firebase';
+import { doc, updateDoc, deleteDoc, onSnapshot, collection, query, where, addDoc } from 'firebase/firestore';
+import { db, createCoordinatorAuth } from '../../../lib/firebase';
 
 export default function AdminCoordinatorsView() {
   const { sports, matches, culturalEvents } = useEvent();
@@ -40,7 +40,8 @@ export default function AdminCoordinatorsView() {
     if (!newCoordEmail || !newCoordName) return;
     setLoading(true);
     try {
-      // Create Firestore user doc (admin must create Firebase Auth user separately)
+      await createCoordinatorAuth(newCoordEmail, 'Welcome@123');
+      
       await addDoc(collection(db, 'users'), {
         email: newCoordEmail,
         name: newCoordName,
@@ -49,7 +50,7 @@ export default function AdminCoordinatorsView() {
         assignedEventIds: selectedEvents,
         isOnline: false,
       });
-      toast.success('Coordinator added! Note: You must create their Firebase Auth account separately.');
+      toast.success('Coordinator added! Default password is Welcome@123');
       setShowAddModal(false);
       setNewCoordEmail(''); setNewCoordName('');
       setSelectedSports([]); setSelectedEvents([]);
@@ -69,9 +70,9 @@ export default function AdminCoordinatorsView() {
         </div>
       </div>
 
-      <div className="p-6 max-w-5xl mx-auto">
-        <div className="bg-gray-900 border border-gray-700 rounded-xl overflow-hidden">
-          <table className="w-full text-sm">
+      <div className="p-4 md:p-6 max-w-5xl mx-auto">
+        <div className="bg-gray-900 border border-gray-700 rounded-xl overflow-x-auto">
+          <table className="w-full text-sm min-w-[600px]">
             <thead className="border-b border-gray-700">
               <tr className="text-xs text-gray-500 uppercase">
                 <th className="text-left px-4 py-3">Name</th>
@@ -105,18 +106,18 @@ export default function AdminCoordinatorsView() {
 
       {/* Add modal */}
       {showAddModal && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4 overflow-y-auto">
           <motion.div
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="bg-gray-900 border border-gray-700 rounded-2xl p-6 w-full max-w-md space-y-4"
+            className="bg-gray-900 border border-gray-700 rounded-2xl p-6 w-full max-w-md space-y-4 my-8 relative"
           >
             <div className="flex items-center justify-between">
               <h3 className="font-bold text-white">Add Coordinator</h3>
               <button onClick={() => setShowAddModal(false)} className="text-gray-400 hover:text-white"><X className="w-5 h-5" /></button>
             </div>
             <p className="text-xs text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded p-2">
-              ⚠️ This creates the Firestore profile. Create the Firebase Auth account via Firebase Console.
+              Default login password will be set to: Welcome@123
             </p>
             <Input value={newCoordName} onChange={e => setNewCoordName(e.target.value)} placeholder="Name" className="bg-gray-800 border-gray-600 text-white" />
             <Input value={newCoordEmail} onChange={e => setNewCoordEmail(e.target.value)} placeholder="Email" type="email" className="bg-gray-800 border-gray-600 text-white" />

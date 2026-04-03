@@ -320,7 +320,8 @@ export default function CoordinatorMatchPanel() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-6">
+          {/* Main Controls Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Team A */}
             <div>
               <div className="flex items-center gap-2 mb-3">

@@ -120,7 +120,7 @@ export default function AdminSportsView() {
               </div>
 
               <div className="overflow-x-auto">
-                <table className="w-full text-xs">
+                <table className="w-full text-xs min-w-[500px]">
                   <thead className="border-b border-gray-700 text-gray-500 uppercase">
                     <tr>
                       <th className="text-left pb-2 pr-4">Key</th>
@@ -171,7 +171,7 @@ export default function AdminSportsView() {
               <button onClick={() => setShowModal(false)}><X className="w-5 h-5 text-gray-400" /></button>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="text-xs text-gray-400 mb-1 block">Sport Name</label>
                 <Input value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} className="bg-gray-800 border-gray-600 text-white" />
@@ -192,7 +192,7 @@ export default function AdminSportsView() {
 
             <div className="border-t border-gray-800 pt-4 mt-6">
               <h4 className="text-sm font-semibold text-amber-400 mb-3">Schema Configuration</h4>
-              <div className="grid grid-cols-3 gap-4 mb-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                 <div>
                   <label className="text-xs text-gray-400 mb-1 block">Period Label (e.g. Half, Set)</label>
                   <Input value={form.scoringSchema.periodLabel} onChange={e => setForm(p => ({ ...p, scoringSchema: { ...p.scoringSchema, periodLabel: e.target.value } }))} className="bg-gray-800 border-gray-600 text-white" />

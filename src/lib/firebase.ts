@@ -1,5 +1,5 @@
-import { initializeApp, getApps } from 'firebase/app';
-import { getAuth, signInWithEmailAndPassword, signOut } from 'firebase/auth';
+import { initializeApp, getApps, deleteApp } from 'firebase/app';
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
@@ -9,15 +9,17 @@ const firebaseReady = Boolean(apiKey);
 
 let app: ReturnType<typeof initializeApp>;
 
+const firebaseConfig = {
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+};
+
 if (firebaseReady && getApps().length === 0) {
-  app = initializeApp({
-    apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-    appId: import.meta.env.VITE_FIREBASE_APP_ID,
-  });
+  app = initializeApp(firebaseConfig);
 } else if (getApps().length > 0) {
   app = getApps()[0];
 } else {
@@ -43,4 +45,13 @@ export async function signInWithEmail(email: string, password: string) {
 
 export async function signOutUser() {
   return signOut(auth);
+}
+
+export async function createCoordinatorAuth(email: string, pass: string = 'Welcome@123') {
+  if (!firebaseReady) return;
+  const secondaryApp = initializeApp(firebaseConfig, 'SecondaryApp' + Date.now());
+  const secondaryAuth = getAuth(secondaryApp);
+  await createUserWithEmailAndPassword(secondaryAuth, email, pass);
+  await signOut(secondaryAuth);
+  await deleteApp(secondaryApp);
 }

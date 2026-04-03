@@ -102,9 +102,9 @@ export default function AdminFixtureBuilder() {
         </div>
       </div>
 
-      <div className="p-6 max-w-5xl mx-auto">
-        <div className="bg-gray-900 border border-gray-700 rounded-xl overflow-hidden">
-          <table className="w-full text-sm">
+      <div className="p-4 md:p-6 max-w-5xl mx-auto">
+        <div className="bg-gray-900 border border-gray-700 rounded-xl overflow-x-auto">
+          <table className="w-full text-sm min-w-[600px]">
             <thead className="border-b border-gray-700">
               <tr className="text-xs text-gray-500 uppercase">
                 <th className="text-left px-4 py-3">Sport</th>
@@ -179,7 +179,7 @@ export default function AdminFixtureBuilder() {
               </select>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
                 <label className="text-xs text-gray-400 block mb-1">Franchise A *</label>
                 <select value={form.franchiseAId} onChange={e => setForm(p => ({ ...p, franchiseAId: e.target.value }))}
@@ -198,7 +198,7 @@ export default function AdminFixtureBuilder() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
                 <label className="text-xs text-gray-400 block mb-1">Date *</label>
                 <Input type="date" value={dateStr} onChange={e => setDateStr(e.target.value)} className="bg-gray-800 border-gray-600 text-white text-sm" />
