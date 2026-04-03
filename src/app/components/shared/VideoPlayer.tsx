@@ -58,18 +58,45 @@ export function VideoPlayer({ streamUrl, status, onStatusChange, className = '' 
     }
   }, [streamUrl]);
 
+  const isYouTube = streamUrl?.includes('youtube.com') || streamUrl?.includes('youtu.be');
+  let youtubeId = '';
+  if (isYouTube && streamUrl) {
+    const match = streamUrl.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
+    if (match) youtubeId = match[1];
+  }
+
+  useEffect(() => {
+    if (isYouTube && streamUrl) {
+      setInternalStatus('loading');
+      onStatusChange?.('loading');
+    }
+  }, [streamUrl, isYouTube, onStatusChange]);
+
   return (
     <div className={`relative bg-black overflow-hidden ${className}`}>
       {streamUrl ? (
-        <video
-          ref={videoRef}
-          className="w-full h-full object-contain"
-          autoPlay
-          muted
-          loop
-        >
-          <source src={streamUrl} type="video/mp4" />
-        </video>
+        isYouTube && youtubeId ? (
+          <iframe
+            src={`https://www.youtube.com/embed/${youtubeId}?autoplay=1&mute=1`}
+            className="w-full h-full border-0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+            onLoad={() => {
+              setInternalStatus('playing');
+              onStatusChange?.('playing');
+            }}
+          />
+        ) : (
+          <video
+            ref={videoRef}
+            className="w-full h-full object-contain"
+            autoPlay
+            muted
+            loop
+          >
+            <source src={streamUrl} type="video/mp4" />
+          </video>
+        )
       ) : (
         <div className="w-full h-full flex items-center justify-center">
           <div className="text-center text-white/60">
@@ -86,7 +113,7 @@ export function VideoPlayer({ streamUrl, status, onStatusChange, className = '' 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-black/80 flex items-center justify-center"
+            className="absolute inset-0 bg-black/80 flex items-center justify-center pointer-events-none"
           >
             <div className="text-center">
               <motion.div
@@ -108,7 +135,7 @@ export function VideoPlayer({ streamUrl, status, onStatusChange, className = '' 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-black/80 flex items-center justify-center"
+            className="absolute inset-0 bg-black/80 flex items-center justify-center pointer-events-none"
           >
             <div className="text-center text-white">
               <AlertCircle className="w-16 h-16 mx-auto mb-4 text-red-500" />
