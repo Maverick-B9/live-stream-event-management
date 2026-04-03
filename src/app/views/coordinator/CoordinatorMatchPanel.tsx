@@ -303,18 +303,19 @@ export default function CoordinatorMatchPanel() {
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-semibold text-gray-300">Score Update</h3>
             <div className="flex items-center gap-2">
-              <select
+              <Input
+                list={`periods-${match.id}`}
                 value={currentPeriod}
                 onChange={e => setCurrentPeriod(e.target.value)}
-                className="bg-gray-800 border border-gray-600 text-white text-sm rounded px-2 py-1"
-              >
-                <option value="">Select {schema.periodLabel}</option>
-                {periodOptions.map(p => (
-                  <option key={p} value={p}>{p}</option>
-                ))}
-                <option value="Final">Final</option>
-                <option value="Halftime">Halftime</option>
-              </select>
+                placeholder={`Status / ${schema.periodLabel}...`}
+                className="bg-gray-800 border-gray-600 text-white text-sm h-8 w-40"
+              />
+              <datalist id={`periods-${match.id}`}>
+                {periodOptions.map(p => <option key={p} value={p} />)}
+                <option value="Final" />
+                <option value="Halftime" />
+                <option value="Innings Break" />
+              </datalist>
             </div>
           </div>
 
