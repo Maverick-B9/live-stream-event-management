@@ -124,7 +124,13 @@ export default function AdminSportsView() {
                     <h3 className="font-semibold text-white">{sport.name}</h3>
                     {sport.status === 'completed' && <span className="px-2 py-0.5 bg-green-500/20 text-green-400 text-[10px] rounded uppercase font-bold tracking-wider">Completed</span>}
                   </div>
-                  <span className="text-xs text-gray-400">{sport.gender === 'men' ? 'Men' : sport.gender === 'women' ? 'Women' : 'Mixed'}</span>
+                  <span className={`text-[9px] px-2 py-0.5 rounded font-black uppercase tracking-widest ${
+                    sport.gender === 'men' ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30' : 
+                    sport.gender === 'women' ? 'bg-rose-600/20 text-rose-400 border border-rose-500/30' : 
+                    'bg-amber-600/20 text-amber-400 border border-amber-500/30'
+                  }`}>
+                    {sport.gender === 'men' ? "Men's Category" : sport.gender === 'women' ? "Women's Category" : 'Mixed Category'}
+                  </span>
                 </div>
                 <div className="ml-auto flex items-center gap-4 text-xs text-gray-500 mr-8">
                   <span>{schema.periodLabel} × {schema.maxPeriods}</span>

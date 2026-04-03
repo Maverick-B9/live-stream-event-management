@@ -122,7 +122,18 @@ export default function AdminFixtureBuilder() {
                 const sp = sports.find(s => s.id === m.sportId);
                 return (
                   <tr key={m.id} className="border-b border-gray-800 hover:bg-gray-800/30">
-                    <td className="px-4 py-3 text-gray-400 text-xs">{sp?.name || '—'}</td>
+                    <td className="px-4 py-3">
+                      <div className="flex flex-col gap-0.5">
+                        <span className="text-white font-medium text-xs">{sp?.name || '—'}</span>
+                        {sp && (
+                          <span className={`text-[9px] font-bold uppercase ${
+                            sp.gender === 'men' ? 'text-blue-400' : sp.gender === 'women' ? 'text-rose-400' : 'text-amber-400'
+                          }`}>
+                            {sp.gender}
+                          </span>
+                        )}
+                      </div>
+                    </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-1.5 text-white text-sm">
                         <span style={{ color: fa?.color }}>{fa?.shortCode || '—'}</span>

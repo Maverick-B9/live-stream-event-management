@@ -173,9 +173,18 @@ export function MatchCard({
         onClick={onClick}
       >
         <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-2">
             <SportIcon className="w-4 h-4 text-gray-400" />
-            <span className="text-xs text-gray-400">{sport.name} · {sport.gender === 'men' ? 'M' : 'W'}</span>
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10px] font-black uppercase text-white/90 tracking-tighter">{sport.name}</span>
+              <span className={`text-[9px] px-1.5 py-0.5 rounded font-black uppercase tracking-tighter ${
+                sport.gender === 'men' ? 'bg-blue-600/30 text-blue-400 border border-blue-500/30' : 
+                sport.gender === 'women' ? 'bg-rose-600/30 text-rose-400 border border-rose-500/30' : 
+                'bg-amber-600/30 text-amber-400 border border-amber-500/30'
+              }`}>
+                {sport.gender === 'men' ? "MEN'S" : sport.gender === 'women' ? "WOMEN'S" : 'MIXED'}
+              </span>
+            </div>
           </div>
           {isLive ? <LiveBadge /> : <StatusBadge status={match.status} />}
         </div>
@@ -277,9 +286,14 @@ export function MatchCard({
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <SportIcon className="w-5 h-5 text-gray-400" />
-          <span className="font-medium text-white">{sport.name}</span>
-          <span className="text-xs text-gray-500 border border-gray-600 rounded px-1.5 py-0.5">
-            {sport.gender === 'men' ? 'Men' : 'Women'}
+          <span className="font-black text-white uppercase tracking-widest text-lg font-['Bebas_Neue']">{sport.name}</span>
+          <span className={`text-[10px] px-2 py-0.5 rounded font-black uppercase tracking-widest flex items-center gap-1 ${
+            sport.gender === 'men' ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30' : 
+            sport.gender === 'women' ? 'bg-rose-600/20 text-rose-400 border border-rose-500/30' : 
+            'bg-amber-600/20 text-amber-400 border border-amber-500/30'
+          }`}>
+            <Icons.User className="w-3 h-3" />
+            {sport.gender === 'men' ? "MEN'S CATEGORY" : sport.gender === 'women' ? "WOMEN'S CATEGORY" : 'MIXED CATEGORY'}
           </span>
         </div>
         <div className="flex items-center gap-2">
