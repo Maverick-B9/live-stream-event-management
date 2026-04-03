@@ -453,16 +453,6 @@ export default function PublicDisplayView() {
         />
       </div>
 
-      {/* Footer */}
-      <footer className="footer-premium py-5 text-center shrink-0 z-50 bg-[#03060d]/80 backdrop-blur-xl border-t border-white/5 relative">
-        <div className="absolute inset-0 bg-grid-white/[0.01] pointer-events-none" />
-        <p className="text-[10px] text-gray-500 uppercase tracking-[0.3em] font-bold font-['Rajdhani'] relative z-10 transition-all group hover:text-gray-400">
-           DESIGNED & DEVELOPED BY 
-           <span className="text-[#f0b429] drop-shadow-[0_0_10px_rgba(240,180,41,0.3)] ml-2 border-b border-[#f0b429]/20 pb-0.5">BALARAM B.</span>
-           <br />
-           <span className="opacity-40 text-[9px] mt-2 block tracking-[0.1em] font-medium">Department of Computer Science & Engineering</span>
-        </p>
-      </footer>
     </div>
   );
 }
