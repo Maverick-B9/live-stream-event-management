@@ -34,27 +34,42 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return;
       }
       try {
-        const userData = await getUserDoc(firebaseUser.uid);
-        if (userData) {
-          setUser(userData);
-          await updateUser(firebaseUser.uid, { isOnline: true });
+          let userData = await getUserDoc(firebaseUser.uid);
+          
+          if (!userData && firebaseUser.email) {
+            const { collection, query, where, getDocs, setDoc, deleteDoc, doc } = await import('firebase/firestore');
+            const { db } = await import('../../lib/firebase');
+            
+            const q = query(collection(db, 'users'), where('email', '==', firebaseUser.email));
+            const snapshot = await getDocs(q);
+            if (!snapshot.empty) {
+              const oldDoc = snapshot.docs[0];
+              await setDoc(doc(db, 'users', firebaseUser.uid), oldDoc.data());
+              await deleteDoc(doc(db, 'users', oldDoc.id));
+              userData = await getUserDoc(firebaseUser.uid);
+            }
+          }
 
-          const handleUnload = () => {
-            updateUser(firebaseUser.uid, { isOnline: false }).catch(() => {});
-          };
-          window.addEventListener('beforeunload', handleUnload);
-          setLoading(false);
-          return () => window.removeEventListener('beforeunload', handleUnload);
-        } else {
-          // User has Firebase Auth but no Firestore profile
+          if (userData) {
+            setUser(userData);
+            await updateUser(firebaseUser.uid, { isOnline: true });
+
+            const handleUnload = () => {
+              updateUser(firebaseUser.uid, { isOnline: false }).catch(() => {});
+            };
+            window.addEventListener('beforeunload', handleUnload);
+            setLoading(false);
+            return () => window.removeEventListener('beforeunload', handleUnload);
+          } else {
+            // User has Firebase Auth but no Firestore profile
+            setUser(null);
+          }
+        } catch (err) {
+          console.error('Error fetching user doc:', err);
           setUser(null);
         }
-      } catch (err) {
-        console.error('Error fetching user doc:', err);
-        setUser(null);
-      }
-      setLoading(false);
-    });
+        setLoading(false);
+      });
 
     return unsub;
   }, []);
