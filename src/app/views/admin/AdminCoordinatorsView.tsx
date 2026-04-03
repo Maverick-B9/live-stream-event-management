@@ -11,12 +11,12 @@ import { addDoc, collection, onSnapshot, query, where } from 'firebase/firestore
 import { db } from '../../../lib/firebase';
 
 export default function AdminCoordinatorsView() {
-  const { franchises, matches, culturalEvents, updateFranchise } = useEvent();
+  const { sports, matches, culturalEvents } = useEvent();
   const [coordinators, setCoordinators] = useState<AppUser[]>([]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [newCoordEmail, setNewCoordEmail] = useState('');
   const [newCoordName, setNewCoordName] = useState('');
-  const [selectedFranchises, setSelectedFranchises] = useState<string[]>([]);
+  const [selectedSports, setSelectedSports] = useState<string[]>([]);
   const [selectedEvents, setSelectedEvents] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -32,7 +32,7 @@ export default function AdminCoordinatorsView() {
   }, []);
 
   const allEvents = [
-    ...matches.map(m => ({ id: m.id, label: `Match: ${franchises.find(f => f.id === m.franchiseAId)?.name} vs ${franchises.find(f => f.id === m.franchiseBId)?.name}` })),
+    ...matches.map(m => ({ id: m.id, label: `Match: ${m.id}` })),
     ...culturalEvents.map(e => ({ id: e.id, label: `Cultural: ${e.name}` })),
   ];
 
@@ -45,14 +45,14 @@ export default function AdminCoordinatorsView() {
         email: newCoordEmail,
         name: newCoordName,
         role: 'coordinator',
-        assignedFranchiseIds: selectedFranchises,
+        assignedSportIds: selectedSports,
         assignedEventIds: selectedEvents,
         isOnline: false,
       });
       toast.success('Coordinator added! Note: You must create their Firebase Auth account separately.');
       setShowAddModal(false);
       setNewCoordEmail(''); setNewCoordName('');
-      setSelectedFranchises([]); setSelectedEvents([]);
+      setSelectedSports([]); setSelectedEvents([]);
     } catch { toast.error('Failed to add coordinator.'); }
     finally { setLoading(false); }
   };
@@ -76,7 +76,7 @@ export default function AdminCoordinatorsView() {
               <tr className="text-xs text-gray-500 uppercase">
                 <th className="text-left px-4 py-3">Name</th>
                 <th className="text-left px-4 py-3">Email</th>
-                <th className="text-left px-4 py-3">Franchises</th>
+                <th className="text-left px-4 py-3">Sports</th>
                 <th className="text-left px-4 py-3">Events</th>
                 <th className="text-center px-4 py-3">Status</th>
               </tr>
@@ -87,7 +87,7 @@ export default function AdminCoordinatorsView() {
                   <td className="px-4 py-3 font-medium text-white">{c.name}</td>
                   <td className="px-4 py-3 text-gray-400">{c.email}</td>
                   <td className="px-4 py-3 text-gray-400 text-xs">
-                    {(c.assignedFranchiseIds || []).map(fid => franchises.find(f => f.id === fid)?.shortCode || fid).join(', ') || '—'}
+                    {(c.assignedSportIds || []).map(sid => sports.find(s => s.id === sid)?.name || sid).join(', ') || '—'}
                   </td>
                   <td className="px-4 py-3 text-gray-400 text-xs">{(c.assignedEventIds || []).length} events</td>
                   <td className="px-4 py-3 text-center">
@@ -121,12 +121,12 @@ export default function AdminCoordinatorsView() {
             <Input value={newCoordName} onChange={e => setNewCoordName(e.target.value)} placeholder="Name" className="bg-gray-800 border-gray-600 text-white" />
             <Input value={newCoordEmail} onChange={e => setNewCoordEmail(e.target.value)} placeholder="Email" type="email" className="bg-gray-800 border-gray-600 text-white" />
             <div>
-              <label className="text-xs text-gray-400 block mb-1">Assign Franchises</label>
+              <label className="text-xs text-gray-400 block mb-1">Assign Sports</label>
               <div className="flex flex-wrap gap-1.5">
-                {franchises.map(f => (
-                  <button key={f.id} onClick={() => setSelectedFranchises(prev => prev.includes(f.id) ? prev.filter(x => x !== f.id) : [...prev, f.id])}
-                    className={`px-2 py-0.5 rounded text-xs border ${selectedFranchises.includes(f.id) ? 'border-amber-500 text-amber-400 bg-amber-500/10' : 'border-gray-700 text-gray-400'}`}>
-                    {f.shortCode}
+                {sports.map(s => (
+                  <button key={s.id} onClick={() => setSelectedSports(prev => prev.includes(s.id) ? prev.filter(x => x !== s.id) : [...prev, s.id])}
+                    className={`px-2 py-0.5 rounded text-xs border ${selectedSports.includes(s.id) ? 'border-amber-500 text-amber-400 bg-amber-500/10' : 'border-gray-700 text-gray-400'}`}>
+                    {s.name}
                   </button>
                 ))}
               </div>

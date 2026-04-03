@@ -195,17 +195,20 @@ export default function PublicDisplayView() {
   const liveMatches = matches.filter(m => m.status === 'live');
   const upcomingMatches = matches.filter(m => m.status === 'upcoming');
 
-  // Get active stream URL
   const activeEventId = branding.activeStreamEventId;
+  const activeMatch = activeEventId ? matches.find(m => m.id === activeEventId) : null;
   let activeStreamUrl: string | null = null;
   let activeEventTicker: string[] = [];
 
   if (activeEventId) {
-    const activeMatch = matches.find(m => m.id === activeEventId);
     const activeCultural = culturalEvents.find(e => e.id === activeEventId);
     activeStreamUrl = activeMatch?.streamUrl || activeCultural?.streamUrl || null;
     activeEventTicker = activeMatch?.tickerHeadlines || activeCultural?.tickerHeadlines || [];
   }
+
+  const activeFranchiseA = activeMatch ? franchises.find(f => f.id === activeMatch.franchiseAId) : null;
+  const activeFranchiseB = activeMatch ? franchises.find(f => f.id === activeMatch.franchiseBId) : null;
+  const activeSport = activeMatch ? sports.find(s => s.id === activeMatch.sportId) : null;
 
   // Countdown widget: show if no stream and upcoming match within 60 min
   const soonMatch = !activeStreamUrl
@@ -279,16 +282,38 @@ export default function PublicDisplayView() {
 
       {/* Main content */}
       <div className="flex-1 flex flex-col min-h-0">
-        {/* Video / Countdown */}
-        <div className="flex-1 min-h-0 relative">
-          {soonMatch && soonFranchiseA && soonFranchiseB ? (
-            <CountdownWidget match={soonMatch} franchiseA={soonFranchiseA} franchiseB={soonFranchiseB} />
+        {/* Video / Countdown / Score Layout */}
+        <div className="flex-1 min-h-0 relative flex overflow-hidden">
+          {soonMatch && soonFranchiseA && soonFranchiseB && !activeStreamUrl ? (
+            <div className="flex-1">
+              <CountdownWidget match={soonMatch} franchiseA={soonFranchiseA} franchiseB={soonFranchiseB} />
+            </div>
           ) : (
-            <VideoPlayer
-              streamUrl={activeStreamUrl}
-              status={activeStreamUrl ? 'playing' : 'idle'}
-              className="w-full h-full"
-            />
+            <div className="flex-1 flex w-full h-full">
+              <div className={`relative h-full transition-all duration-500 ease-in-out ${activeMatch && activeFranchiseA && activeFranchiseB ? 'w-3/4' : 'w-full'}`}>
+                <VideoPlayer
+                  streamUrl={activeStreamUrl}
+                  status={activeStreamUrl ? 'playing' : 'idle'}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              {/* Score panel aligned perfectly next to the video */}
+              {activeMatch && activeFranchiseA && activeFranchiseB && activeSport && (
+                <div className="w-1/4 h-full bg-gray-900 border-l border-gray-800 flex flex-col items-center justify-center px-6 overflow-y-auto shrink-0 relative shadow-2xl z-10 block">
+                  <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-black/50 to-transparent pointer-events-none" />
+                  <div className="w-full max-w-sm mt-8 space-y-6">
+                     <h2 className="text-xl font-bold text-center text-amber-400 uppercase tracking-widest break-words mb-2">Live Score</h2>
+                     <MatchCard
+                        match={activeMatch}
+                        franchiseA={activeFranchiseA}
+                        franchiseB={activeFranchiseB}
+                        sport={activeSport}
+                        variant="full"
+                      />
+                  </div>
+                </div>
+              )}
+            </div>
           )}
         </div>
 

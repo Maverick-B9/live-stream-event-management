@@ -93,6 +93,8 @@ export const router = createBrowserRouter([
       { path: 'video', element: <AdminVideoControlView /> },
       { path: 'headlines', element: <AdminHeadlinesView /> },
       { path: 'branding', element: <AdminBrandingView /> },
+      { path: 'match/:matchId', element: <CoordinatorMatchPanel /> },
+      { path: 'event/:eventId', element: <CoordinatorCulturalPanel /> },
     ],
   },
   {

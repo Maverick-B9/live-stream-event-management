@@ -203,7 +203,7 @@ export function subscribeUser(uid: string, cb: (u: AppUser) => void) {
         email: d.email || '',
         role: d.role || 'coordinator',
         name: d.name || '',
-        assignedFranchiseIds: d.assignedFranchiseIds || [],
+        assignedSportIds: d.assignedSportIds || [],
         assignedEventIds: d.assignedEventIds || [],
         isOnline: d.isOnline || false,
       });
@@ -255,6 +255,10 @@ export async function updateSport(id: string, data: Partial<any>) {
   return setDoc(doc(db, 'sports', id), data, { merge: true });
 }
 
+export async function createSport(data: any) {
+  return addDoc(collection(db, 'sports'), data);
+}
+
 export async function updateUser(uid: string, data: Partial<any>) {
   return setDoc(doc(db, 'users', uid), data, { merge: true });
 }
@@ -268,7 +272,7 @@ export async function getUserDoc(uid: string): Promise<AppUser | null> {
     email: d.email || '',
     role: d.role || 'coordinator',
     name: d.name || '',
-    assignedFranchiseIds: d.assignedFranchiseIds || [],
+    assignedSportIds: d.assignedSportIds || [],
     assignedEventIds: d.assignedEventIds || [],
     isOnline: d.isOnline || false,
   };

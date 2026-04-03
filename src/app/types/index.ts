@@ -96,7 +96,7 @@ export interface AppUser {
   email: string;
   role: UserRole;
   name: string;
-  assignedFranchiseIds: string[];
+  assignedSportIds: string[];
   assignedEventIds: string[];
   isOnline: boolean;
 }

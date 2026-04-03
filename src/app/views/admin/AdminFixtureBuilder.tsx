@@ -7,9 +7,9 @@ import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { StatusBadge } from '../../components/shared/StatusBadge';
 import { toast } from 'sonner';
-import { ArrowLeft, Plus, X, Edit2, Trash2 } from 'lucide-react';
+import { ArrowLeft, Plus, X, Edit2, Trash2, Activity } from 'lucide-react';
 import { format } from 'date-fns';
-import type { Match, MatchStatus } from '../../types';
+import type { Match, MatchStatus, MatchEvent } from '../../types';
 import { deleteMatch } from '../../lib/firestore';
 
 const EMPTY_MATCH = {
@@ -23,11 +23,11 @@ const EMPTY_MATCH = {
   scoreA: {},
   scoreB: {},
   currentPeriod: '',
-  tickerHeadlines: [],
-  matchEvents: [],
-  pendingStreamRequest: null,
-  streamUrl: null,
-  winnerId: null,
+  tickerHeadlines: [] as string[],
+  matchEvents: [] as MatchEvent[],
+  pendingStreamRequest: null as any,
+  streamUrl: null as any,
+  winnerId: null as any,
 };
 
 export default function AdminFixtureBuilder() {
@@ -135,7 +135,10 @@ export default function AdminFixtureBuilder() {
                     <td className="px-4 py-3"><StatusBadge status={m.status} /></td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex justify-end gap-2">
-                        <button onClick={() => openEdit(m)} className="text-gray-400 hover:text-white p-1 rounded hover:bg-gray-700">
+                        <Link to={`/admin/match/${m.id}`} title="Manage Score" className="text-amber-400 hover:text-amber-300 p-1 rounded hover:bg-amber-900/20">
+                          <Activity className="w-4 h-4" />
+                        </Link>
+                        <button onClick={() => openEdit(m)} title="Edit Details" className="text-gray-400 hover:text-white p-1 rounded hover:bg-gray-700">
                           <Edit2 className="w-4 h-4" />
                         </button>
                         <button onClick={() => setDeleteConfirm(m.id)} className="text-gray-400 hover:text-red-400 p-1 rounded hover:bg-red-900/20">

@@ -23,6 +23,7 @@ import {
   seedSettingsIfMissing,
   createMatch as fsCreateMatch,
   createFranchise as fsCreateFranchise,
+  createSport as fsCreateSport,
 } from '../lib/firestore';
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { storage } from '../../lib/firebase';
@@ -65,6 +66,7 @@ interface EventContextType {
   forceSetActiveStream: (eventId: string) => Promise<void>;
   createMatch: (data: Omit<Match, 'id'>) => Promise<void>;
   createFranchise: (data: Omit<Franchise, 'id'>) => Promise<void>;
+  createSport: (data: Omit<Sport, 'id'>) => Promise<void>;
   logActivity: (userId: string, userName: string, action: string, eventId?: string, eventName?: string) => Promise<void>;
   uploadFile: (file: File, path: string) => Promise<string>;
 }
@@ -208,6 +210,10 @@ export function EventProvider({ children }: { children: React.ReactNode }) {
     await fsCreateFranchise(data);
   };
 
+  const createSportFn = async (data: Omit<Sport, 'id'>) => {
+    await fsCreateSport(data);
+  };
+
   const logActivity = async (
     userId: string,
     userName: string,
@@ -246,6 +252,7 @@ export function EventProvider({ children }: { children: React.ReactNode }) {
         forceSetActiveStream,
         createMatch: createMatchFn,
         createFranchise: createFranchiseFn,
+        createSport: createSportFn,
         logActivity,
         uploadFile,
       }}

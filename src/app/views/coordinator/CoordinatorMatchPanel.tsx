@@ -167,6 +167,7 @@ export default function CoordinatorMatchPanel() {
   const { matches, sports, franchises, updateMatch, logActivity, branding } = useEvent();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const basePath = user?.role === 'admin' ? '/admin/fixtures' : '/coordinator';
 
   const match = matches.find(m => m.id === matchId);
   const sport = match ? sports.find(s => s.id === match.sportId) : null;
@@ -200,7 +201,7 @@ export default function CoordinatorMatchPanel() {
       <div className="min-h-screen bg-gray-950 text-white flex items-center justify-center">
         <div className="text-center">
           <p className="text-gray-400 mb-4">Match not found or still loading...</p>
-          <Link to="/coordinator" className="text-amber-400 underline text-sm">← Back to Dashboard</Link>
+          <Link to={basePath} className="text-amber-400 underline text-sm">← Back to Dashboard</Link>
         </div>
       </div>
     );
@@ -267,7 +268,7 @@ export default function CoordinatorMatchPanel() {
     <div className="min-h-screen bg-gray-950 text-white">
       {/* Top bar */}
       <div className="flex items-center gap-4 px-6 py-3 border-b border-gray-800 sticky top-0 z-10 bg-gray-950">
-        <button onClick={() => navigate('/coordinator')} className="text-gray-400 hover:text-white">
+        <button onClick={() => navigate(basePath)} className="text-gray-400 hover:text-white">
           <ArrowLeft className="w-5 h-5" />
         </button>
         <div>
