@@ -8,9 +8,10 @@ interface VideoPlayerProps {
   status: 'idle' | 'loading' | 'playing' | 'paused' | 'error';
   onStatusChange?: (status: 'idle' | 'loading' | 'playing' | 'paused' | 'error') => void;
   className?: string;
+  onPlayerReady?: (player: any) => void;
 }
 
-export function VideoPlayer({ streamUrl, status, onStatusChange, className = '' }: VideoPlayerProps) {
+export function VideoPlayer({ streamUrl, status, onStatusChange, className = '', onPlayerReady }: VideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [internalStatus, setInternalStatus] = useState(status);
 
@@ -77,13 +78,14 @@ export function VideoPlayer({ streamUrl, status, onStatusChange, className = '' 
       {streamUrl ? (
         isYouTube && youtubeId ? (
           <iframe
-            src={`https://www.youtube.com/embed/${youtubeId}?autoplay=1&mute=1`}
+            src={`https://www.youtube.com/embed/${youtubeId}?autoplay=1&mute=1&controls=1&disablekb=0&fs=1&rel=0&modestbranding=1&enablejsapi=1`}
             className="w-full h-full border-0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
             allowFullScreen
-            onLoad={() => {
+            onLoad={(e) => {
               setInternalStatus('playing');
               onStatusChange?.('playing');
+              // The parent will handle the YT API object via the global YT object once ready
             }}
           />
         ) : (

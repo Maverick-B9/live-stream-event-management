@@ -128,7 +128,7 @@ function ScoreCell({ value, live }: { value: string; live: boolean }) {
   return (
     <motion.span
       ref={scope}
-      className="text-2xl font-bold px-2 rounded"
+      className="text-4xl font-bold px-2 rounded font-['Bebas_Neue'] tracking-wider text-white"
     >
       {value}
     </motion.span>
@@ -182,35 +182,64 @@ export function MatchCard({
 
         <div className="flex items-center justify-between">
           {/* Team A */}
-          <div className="flex items-center gap-2 flex-1 min-w-0">
+          <div className="flex items-center gap-3 flex-1 min-w-0">
             <div
-              className="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0"
-              style={{ backgroundColor: franchiseA.color }}
+              className="w-10 h-12 rounded-t-lg rounded-b-[40%] flex items-center justify-center text-white text-sm font-bold shrink-0 border-2 border-white/30 shadow-[0_4px_10px_rgba(0,0,0,0.5)]"
+              style={{ 
+                backgroundColor: franchiseA.color, 
+                boxShadow: `0 0 15px ${franchiseA.color}40`,
+                clipPath: 'polygon(0% 0%, 100% 0%, 100% 85%, 50% 100%, 0% 85%)'
+              }}
             >
               {franchiseA.shortCode?.slice(0, 2) || franchiseA.name[0]}
             </div>
-            <span className="text-white text-sm font-medium truncate">{franchiseA.name}</span>
+            <span className="text-white text-base font-bold tracking-wide truncate">{franchiseA.name}</span>
           </div>
           <ScoreCell value={primaryA} live={isLive} />
         </div>
 
         <div className="flex items-center justify-between mt-1.5">
           {/* Team B */}
-          <div className="flex items-center gap-2 flex-1 min-w-0">
+          <div className="flex items-center gap-3 flex-1 min-w-0">
             <div
-              className="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0"
-              style={{ backgroundColor: franchiseB.color }}
+              className="w-10 h-12 rounded-t-lg rounded-b-[40%] flex items-center justify-center text-white text-sm font-bold shrink-0 border-2 border-white/30 shadow-[0_4px_10px_rgba(0,0,0,0.5)]"
+              style={{ 
+                backgroundColor: franchiseB.color, 
+                boxShadow: `0 0 15px ${franchiseB.color}40`,
+                clipPath: 'polygon(0% 0%, 100% 0%, 100% 85%, 50% 100%, 0% 85%)'
+              }}
             >
               {franchiseB.shortCode?.slice(0, 2) || franchiseB.name[0]}
             </div>
-            <span className="text-white text-sm font-medium truncate">{franchiseB.name}</span>
+            <span className="text-white text-base font-bold tracking-wide truncate">{franchiseB.name}</span>
           </div>
           <ScoreCell value={primaryB} live={isLive} />
         </div>
 
         {match.currentPeriod && (
-          <div className="mt-2 text-center text-xs font-medium text-amber-400">
+          <div className="mt-2 text-center text-[10px] uppercase font-bold text-amber-400 tracking-wider">
             {match.currentPeriod}
+          </div>
+        )}
+
+        {sport.name.toLowerCase() === 'cricket' && isLive && match.matchEvents && match.matchEvents.length > 0 && (
+          <div className="mt-4 p-2 bg-black/40 rounded-lg border border-white/10">
+            <div className="flex justify-between text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1.5">
+              <span>RECENT EVENTS</span>
+            </div>
+            <div className="flex gap-1 h-2 w-full">
+              {match.matchEvents.slice(-6).map((ev, idx) => {
+                const desc = ev.description.toLowerCase();
+                let color = 'bg-gray-600';
+                if (desc.includes('boundary') || desc.includes('four') || desc.includes('six')) color = 'bg-green-500';
+                if (desc.includes('wicket')) color = 'bg-red-500 animate-pulse';
+                if (desc.includes('wide') || desc.includes('no ball')) color = 'bg-amber-500';
+                return <div key={idx} className={`flex-1 ${color} rounded-full`}></div>;
+              })}
+              {Array.from({ length: Math.max(0, 6 - (match.matchEvents?.length || 0)) }).map((_, i) => (
+                 <div key={`empty-${i}`} className="flex-1 bg-white/5 rounded-full border border-white/10"></div>
+              ))}
+            </div>
           </div>
         )}
 
@@ -267,17 +296,17 @@ export function MatchCard({
       <div className="space-y-3 mb-4">
         {/* Team A */}
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
             <div
-              className="w-12 h-12 rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0"
-              style={{ backgroundColor: franchiseA.color }}
+              className="w-14 h-16 rounded-t-lg rounded-b-[50%] flex items-center justify-center text-white text-lg font-bold shrink-0 border-2 border-white/20"
+              style={{ backgroundColor: franchiseA.color, boxShadow: `0 0 15px ${franchiseA.color}80` }}
             >
               {franchiseA.shortCode || franchiseA.name.slice(0, 3)}
             </div>
             <div>
-              <div className="text-white font-semibold">{franchiseA.name}</div>
+              <div className="text-white font-bold text-lg">{franchiseA.name}</div>
               {match.winnerId === franchiseA.id && (
-                <span className="text-xs text-amber-400 font-medium">🏆 Winner</span>
+                <span className="text-sm text-amber-400 font-bold uppercase tracking-wider drop-shadow-[0_0_5px_rgba(251,191,36,0.8)]">🏆 Winner</span>
               )}
             </div>
           </div>
@@ -288,17 +317,17 @@ export function MatchCard({
 
         {/* Team B */}
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
             <div
-              className="w-12 h-12 rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0"
-              style={{ backgroundColor: franchiseB.color }}
+              className="w-14 h-16 rounded-t-lg rounded-b-[50%] flex items-center justify-center text-white text-lg font-bold shrink-0 border-2 border-white/20"
+              style={{ backgroundColor: franchiseB.color, boxShadow: `0 0 15px ${franchiseB.color}80` }}
             >
               {franchiseB.shortCode || franchiseB.name.slice(0, 3)}
             </div>
             <div>
-              <div className="text-white font-semibold">{franchiseB.name}</div>
+              <div className="text-white font-bold text-lg">{franchiseB.name}</div>
               {match.winnerId === franchiseB.id && (
-                <span className="text-xs text-amber-400 font-medium">🏆 Winner</span>
+                <span className="text-sm text-amber-400 font-bold uppercase tracking-wider drop-shadow-[0_0_5px_rgba(251,191,36,0.8)]">🏆 Winner</span>
               )}
             </div>
           </div>

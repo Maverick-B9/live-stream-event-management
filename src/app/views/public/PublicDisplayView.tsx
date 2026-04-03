@@ -5,8 +5,9 @@ import { VideoPlayer } from '../../components/shared/VideoPlayer';
 import { NewsTicker } from '../../components/shared/NewsTicker';
 import { MatchCard } from '../../components/shared/MatchCard';
 import { EventLogo } from '../../components/shared/EventLogo';
-import { Wifi, WifiOff, Trophy, BarChart2 } from 'lucide-react';
+import { Wifi, WifiOff, Trophy, BarChart2, Share2, Users, Clock } from 'lucide-react';
 import { formatDistanceToNow, differenceInMinutes } from 'date-fns';
+import { toast } from 'sonner';
 
 // ── Countdown timer widget ────────────────────────────────────────
 function CountdownWidget({ match, franchiseA, franchiseB }: {
@@ -193,12 +194,13 @@ export default function PublicDisplayView() {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [showStandings, setShowStandings] = useState(false);
   const [winnerMatchId, setWinnerMatchId] = useState<string | null>(null);
+  const [filter, setFilter] = useState<'all' | 'cricket' | 'football'>('all');
   const prevStatusesRef = useRef<Record<string, string>>({});
+  const videoContainerRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const t = setInterval(() => setCurrentTime(new Date()), 1000);
-    return () => clearInterval(t);
-  }, []);
+
+
+
 
   // Detect match completion for winner announcement
   useEffect(() => {
@@ -243,8 +245,30 @@ export default function PublicDisplayView() {
 
   const effectiveTicker = activeEventTicker.length > 0 ? activeEventTicker : branding.globalTickerHeadlines;
 
+  const filteredMatches = matches.filter(m => {
+    if (filter === 'all') return true;
+    const sp = sports.find(s => s.id === m.sportId);
+    return sp?.name.toLowerCase() === filter;
+  });
+
+  const filteredLiveMatches = filteredMatches.filter(m => m.status === 'live');
+
+  const formatTime = (sec: number) => {
+    const m = Math.floor(sec / 60);
+    const s = Math.floor(sec % 60);
+    return `${m}:${s.toString().padStart(2, '0')}`;
+  };
+
+  const copyShareLink = () => {
+    navigator.clipboard.writeText(window.location.href);
+    toast.success("Broadcast Link Copied", {
+      description: "You can now share this live relay with others.",
+      duration: 3000,
+    });
+  };
+
   return (
-    <div className="h-screen flex flex-col bg-black text-white overflow-hidden relative">
+    <div className="h-screen w-full flex flex-col bg-[#060b18] text-white relative font-['Rajdhani'] overflow-hidden">
       {/* Winner announcement overlay */}
       <AnimatePresence>
         {winnerMatch && winnerFranchise && (
@@ -275,54 +299,95 @@ export default function PublicDisplayView() {
 
       {/* Top bar */}
       <div
-        className="flex items-center justify-between px-8 py-3 border-b border-white/10 z-10 shrink-0"
-        style={{ backgroundColor: branding.primaryColor }}
+        className="flex items-center justify-between px-8 py-4 border-b border-white/5 z-10 shrink-0 bg-[#060b18]/80 backdrop-blur-xl shadow-2xl relative"
       >
+        <div className="absolute inset-0 bg-grid-white/[0.02] pointer-events-none" />
         <div className="flex items-center gap-3">
           <EventLogo size="md" />
           <h1 className="text-2xl font-bold tracking-wide">{branding.eventName}</h1>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-6">
           <button
             onClick={() => setShowStandings(true)}
-            className="flex items-center gap-1.5 text-xs text-white/60 hover:text-white border border-white/20 hover:border-white/60 rounded-full px-3 py-1 transition-all"
+            className="flex items-center gap-2 text-sm font-bold text-[#f0b429] border border-[#f0b429]/30 hover:border-[#f0b429] hover:bg-[#f0b429]/10 rounded-lg px-5 py-2 transition-all uppercase tracking-widest shadow-[0_0_15px_rgba(240,180,41,0.1)]"
           >
-            <BarChart2 className="w-3.5 h-3.5" /> Standings
+            <BarChart2 className="w-4 h-4" /> Standings
           </button>
-          <div className="text-right">
-            <div className="text-xs text-white/60">
-              {currentTime.toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' })}
-            </div>
-            <div className="text-lg font-semibold tabular-nums">
-              {currentTime.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+          <div className="flex items-center gap-4 border-l border-white/10 pl-6 h-10">
+            <Clock className="w-5 h-5 text-gray-500" />
+            <div className="text-right">
+              <div className="text-[10px] text-gray-500 uppercase font-bold tracking-tighter">
+                {currentTime.toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'short' })}
+              </div>
+              <div className="text-xl font-bold font-['Bebas_Neue'] tracking-wider leading-none">
+                {currentTime.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+              </div>
             </div>
           </div>
         </div>
       </div>
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col min-h-0">
-        {/* Video / Countdown / Score Layout */}
-        <div className="flex-1 min-h-0 relative flex overflow-hidden">
-          {soonMatch && soonFranchiseA && soonFranchiseB && !activeStreamUrl ? (
-            <div className="flex-1">
-              <CountdownWidget match={soonMatch} franchiseA={soonFranchiseA} franchiseB={soonFranchiseB} />
-            </div>
-          ) : (
-            <div className="flex-1 flex flex-col lg:flex-row w-full h-full">
-              <div className={`relative transition-all duration-500 ease-in-out ${activeMatch && activeFranchiseA && activeFranchiseB ? 'h-1/2 lg:h-full w-full lg:w-3/4 shrink-0' : 'h-full w-full'}`}>
+      <div className="flex-1 flex flex-col lg:flex-row w-full min-h-0 relative">
+        {soonMatch && soonFranchiseA && soonFranchiseB && !activeStreamUrl ? (
+          <div className="flex-1 h-full">
+            <CountdownWidget match={soonMatch} franchiseA={soonFranchiseA} franchiseB={soonFranchiseB} />
+          </div>
+        ) : (
+          <div className="flex-1 flex flex-col lg:flex-row w-full h-full relative z-10 shadow-[0_0_50px_rgba(0,0,0,0.8)]">
+            {/* Left side: Video */}
+            <div 
+              ref={videoContainerRef}
+              className={`relative transition-all duration-500 ease-in-out group ${activeMatch && activeFranchiseA && activeFranchiseB ? 'flex-1 flex flex-col min-w-0 bg-black' : 'flex-1 flex flex-col min-w-0 w-full bg-black'}`}
+            >
+              <div className="flex-1 relative w-full overflow-hidden">
                 <VideoPlayer
                   streamUrl={activeStreamUrl}
                   status={activeStreamUrl ? 'playing' : 'idle'}
-                  className="w-full h-full object-cover"
+                  className="absolute inset-0 w-full h-full object-contain"
                 />
               </div>
-              {/* Score panel aligned perfectly next to the video */}
-              {activeMatch && activeFranchiseA && activeFranchiseB && activeSport && (
-                <div className="w-full lg:w-1/4 h-1/2 lg:h-full bg-gray-900 border-t lg:border-t-0 lg:border-l border-gray-800 flex flex-col items-center justify-center p-4 lg:px-6 overflow-y-auto shrink-0 relative shadow-2xl z-10 block">
-                  <div className="absolute top-0 left-0 right-0 h-16 lg:h-32 bg-gradient-to-b from-black/50 to-transparent pointer-events-none" />
-                  <div className="w-full max-w-sm mt-4 lg:mt-8 space-y-4 lg:space-y-6">
-                     <h2 className="text-lg lg:text-xl font-bold text-center text-amber-400 uppercase tracking-widest break-words mb-1 lg:mb-2">Live Score</h2>
+              
+              {/* Match Info Card Beneath Video */}
+              {activeMatch && activeStreamUrl && (
+                <div className="bg-[#0e172c] border-t border-t-white/10 px-6 py-3.5 flex items-center justify-between shrink-0 shadow-[0_-10px_30px_rgba(0,0,0,0.5)] z-20">
+                  <div className="flex items-center gap-5">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2.5 h-2.5 rounded-full bg-red-600 animate-pulse shadow-[0_0_15px_red]"></div>
+                      <span className="text-red-500 font-bold uppercase tracking-[0.25em] text-xs">LIVE RELAY</span>
+                    </div>
+                    <div className="h-5 w-px bg-white/20"></div>
+                    <div className="text-white font-bold text-lg bebas tracking-widest text-[#f0b429]">MAHADASARA SPORTS NETWORK</div>
+                  </div>
+                  
+                  <div className="flex items-center">
+                    <button 
+                      onClick={copyShareLink}
+                      className="flex items-center gap-2 text-xs bg-white/5 hover:bg-[#f0b429]/10 text-[#f0b429] font-bold px-4 py-2 rounded-lg transition-all uppercase tracking-widest border border-white/10 hover:border-[#f0b429]/40"
+                    >
+                       <Share2 className="w-3.5 h-3.5"/> Share Broadcast
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Score panel aligned perfectly next to the video */}
+            {activeMatch && activeFranchiseA && activeFranchiseB && activeSport && (
+              <div className="w-full lg:w-[350px] lg:min-w-[350px] bg-[#060b18] border-t lg:border-t-0 lg:border-l border-white/5 flex flex-col shrink-0 relative z-30 shadow-2xl">
+                <div className="flex border-b border-white/5 shrink-0">
+                  {['all', 'cricket', 'football'].map(t => (
+                    <button 
+                      key={t} onClick={() => setFilter(t as any)}
+                      className={`flex-1 py-4 text-[10px] font-bold uppercase tracking-[0.1em] transition-all border-b-2 ${filter === t ? 'text-[#f0b429] border-[#f0b429] bg-[#f0b429]/5' : 'text-gray-500 border-transparent hover:text-gray-300'}`}
+                    >
+                      {t}
+                    </button>
+                  ))}
+                </div>
+                <div className="flex-1 overflow-y-auto p-5 space-y-6 no-scrollbar">
+                   <h2 className="text-xl font-black text-[#f0b429] uppercase tracking-wider mb-2 font-['Bebas_Neue']">Live</h2>
+                   <div>
                      <MatchCard
                         match={activeMatch}
                         franchiseA={activeFranchiseA}
@@ -330,71 +395,50 @@ export default function PublicDisplayView() {
                         sport={activeSport}
                         variant="full"
                       />
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Live scorecards strip */}
-        {liveMatches.length > 0 && (
-          <div className="bg-black/60 backdrop-blur-sm py-3 px-6 shrink-0">
-            <div className="flex items-center gap-2 mb-2">
-              <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
-              <span className="text-xs font-semibold text-red-400 uppercase tracking-wider">Live Now</span>
-            </div>
-            <div className="flex gap-3 overflow-x-auto pb-1">
-              {liveMatches.map(m => {
-                const fa = franchises.find(f => f.id === m.franchiseAId);
-                const fb = franchises.find(f => f.id === m.franchiseBId);
-                const sp = sports.find(s => s.id === m.sportId);
-                if (!fa || !fb || !sp) return null;
-                return (
-                  <MatchCard
-                    key={m.id}
-                    match={m}
-                    franchiseA={fa}
-                    franchiseB={fb}
-                    sport={sp}
-                    variant="compact"
-                    showShare
-                  />
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* Upcoming row */}
-        {upcomingMatches.length > 0 && (
-          <div className="bg-black/40 py-2 px-6 shrink-0">
-            <div className="flex gap-3 overflow-x-auto items-center">
-              <span className="text-xs text-gray-500 uppercase tracking-wider shrink-0">Upcoming</span>
-              {upcomingMatches.slice(0, 6).map(m => {
-                const fa = franchises.find(f => f.id === m.franchiseAId);
-                const fb = franchises.find(f => f.id === m.franchiseBId);
-                const sp = sports.find(s => s.id === m.sportId);
-                if (!fa || !fb || !sp) return null;
-                return (
-                  <div key={m.id} className="shrink-0 bg-gray-900/60 border border-gray-700 rounded-lg px-3 py-2 text-sm">
-                    <div className="text-xs text-gray-400">{sp.name}</div>
-                    <div className="text-white font-medium">
-                      <span style={{ color: fa.color }}>{fa.shortCode}</span>
-                      {' vs '}
-                      <span style={{ color: fb.color }}>{fb.shortCode}</span>
                     </div>
-                    <div className="text-xs text-blue-400">{formatDistanceToNow(m.dateTime, { addSuffix: true })}</div>
-                  </div>
-                );
-              })}
-            </div>
+                    
+                    {filteredLiveMatches.length > 0 && (
+                      <div className="pt-6 border-t border-white/5">
+                         <div className="text-[10px] text-gray-500 font-bold uppercase tracking-[0.3em] mb-4">Other Live</div>
+                         <div className="space-y-4">
+                            {filteredLiveMatches.filter(m => m.id !== activeMatch.id).map(m => {
+                              const fa = franchises.find(f => f.id === m.franchiseAId);
+                              const fb = franchises.find(f => f.id === m.franchiseBId);
+                              const sp = sports.find(s => s.id === m.sportId);
+                              if (!fa || !fb || !sp) return null;
+                              return <MatchCard key={m.id} match={m} franchiseA={fa} franchiseB={fb} sport={sp} variant="compact" />;
+                            })}
+                         </div>
+                      </div>
+                    )}
+
+                    {upcomingMatches.length > 0 && (
+                      <div className="pt-6 border-t border-white/5">
+                         <div className="text-[10px] text-[#3b82f6] font-bold uppercase tracking-[0.3em] mb-4 font-['Bebas_Neue'] text-xl">Upcoming</div>
+                         <div className="space-y-4">
+                            {upcomingMatches.filter(m => {
+                               if (filter === 'all') return true;
+                               const sp = sports.find(s => s.id === m.sportId);
+                               return sp?.name.toLowerCase() === filter;
+                            }).slice(0, 10).map(m => {
+                              const fa = franchises.find(f => f.id === m.franchiseAId);
+                              const fb = franchises.find(f => f.id === m.franchiseBId);
+                              const sp = sports.find(s => s.id === m.sportId);
+                              if (!fa || !fb || !sp) return null;
+                              return <MatchCard key={m.id} match={m} franchiseA={fa} franchiseB={fb} sport={sp} variant="compact" />;
+                            })}
+                         </div>
+                      </div>
+                    )}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
 
       {/* Dual ticker */}
-      <div className="shrink-0 border-t border-white/10">
+      <div className="shrink-0 border-t border-white/10 z-40 bg-black">
         <NewsTicker
           headlines={branding.globalTickerHeadlines.length > 0 ? branding.globalTickerHeadlines : ['Welcome to the event!']}
           backgroundColor={branding.primaryColor}
@@ -407,6 +451,14 @@ export default function PublicDisplayView() {
           textColor={branding.secondaryColor}
           speed={Math.max(30, branding.globalTickerSpeed - 10)}
         />
+      </div>
+
+      {/* Footer */}
+      <div className="bg-[#03060d] border-t border-white/5 py-4 text-center shrink-0 z-50">
+        <p className="text-[10px] text-gray-500 uppercase tracking-widest font-bold font-['Rajdhani']">
+          Developed by <span className="text-[#f0b429]">Balaram B.</span> <br />
+          <span className="opacity-50 text-[9px]">Department of Computer Science & Engineering</span>
+        </p>
       </div>
     </div>
   );
