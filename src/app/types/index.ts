@@ -32,6 +32,7 @@ export interface Sport {
   name: string;
   gender: 'men' | 'women';
   icon: string;
+  status?: 'active' | 'completed';
   scoringSchema: SportScoringSchema;
 }
 

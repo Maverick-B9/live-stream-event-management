@@ -57,8 +57,10 @@ function CountdownWidget({ match, franchiseA, franchiseB }: {
 
 // ── Standings overlay ─────────────────────────────────────────────
 function StandingsOverlay({ onClose }: { onClose: () => void }) {
-  const { matches, franchises } = useEvent();
-  const completed = matches.filter(m => m.status === 'completed');
+  const { matches, franchises, sports } = useEvent();
+  const [selectedSportId, setSelectedSportId] = React.useState<string>('all');
+  
+  const completed = matches.filter(m => m.status === 'completed' && (selectedSportId === 'all' || m.sportId === selectedSportId));
 
   const standings = franchises.map(f => {
     const gamesA = completed.filter(m => m.franchiseAId === f.id);
@@ -88,6 +90,24 @@ function StandingsOverlay({ onClose }: { onClose: () => void }) {
             <BarChart2 className="w-5 h-5 text-amber-400" /> Franchise Standings
           </h3>
           <button onClick={onClose} className="text-gray-400 hover:text-white text-xl">✕</button>
+        </div>
+
+        <div className="flex gap-2 overflow-x-auto pb-4 mb-2">
+          <button 
+            onClick={() => setSelectedSportId('all')}
+            className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap border transition-colors ${selectedSportId === 'all' ? 'bg-amber-500 text-black border-amber-500' : 'bg-gray-800 text-gray-400 border-gray-700 hover:border-gray-500'}`}
+          >
+            Global Overall
+          </button>
+          {sports.map(sport => (
+             <button 
+                key={sport.id}
+                onClick={() => setSelectedSportId(sport.id)}
+                className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap border transition-colors ${selectedSportId === sport.id ? 'bg-amber-500 text-black border-amber-500' : 'bg-gray-800 text-gray-400 border-gray-700 hover:border-gray-500'}`}
+             >
+                {sport.name}
+             </button>
+          ))}
         </div>
         <table className="w-full text-sm">
           <thead>

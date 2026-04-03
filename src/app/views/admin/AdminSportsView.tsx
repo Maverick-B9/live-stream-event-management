@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router';
 import { useEvent } from '../../contexts/EventContext';
-import { ArrowLeft, Plus, Edit2, X, Trash2, Save } from 'lucide-react';
+import { ArrowLeft, Plus, Edit2, X, Trash2, Save, Download } from 'lucide-react';
 import * as Icons from 'lucide-react';
+import { generateSportReport } from '../../lib/pdfGenerator';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { toast } from 'sonner';
@@ -23,7 +24,7 @@ const EMPTY_SPORT: Omit<Sport, 'id'> = {
 };
 
 export default function AdminSportsView() {
-  const { sports, updateSport, createSport } = useEvent();
+  const { sports, matches, franchises, updateSport, createSport } = useEvent();
   const [showModal, setShowModal] = useState(false);
   const [editSport, setEditSport] = useState<Sport | null>(null);
   const [form, setForm] = useState<Omit<Sport, 'id'>>({ ...EMPTY_SPORT });
@@ -105,13 +106,24 @@ export default function AdminSportsView() {
           const schema = sport.scoringSchema;
           return (
             <div key={sport.id} className="bg-gray-900 border border-gray-700 rounded-xl p-5 group relative">
-              <button title="Edit Schema" onClick={() => openEdit(sport)} className="absolute top-4 right-4 text-gray-500 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity">
-                <Edit2 className="w-4 h-4" />
-              </button>
-              <div className="flex items-center gap-3 mb-4">
+              <div className="absolute top-4 right-4 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button title={sport.status === 'completed' ? "Reopen Sport" : "Mark Completed"} onClick={() => updateSport(sport.id, { status: sport.status === 'completed' ? 'active' : 'completed' })} className="text-gray-500 hover:text-green-400">
+                  <Icons.CheckCircle className={`w-4 h-4 ${sport.status === 'completed' ? 'text-green-400' : ''}`} />
+                </button>
+                <button title="Download PDF Report" onClick={() => generateSportReport(sport, matches, franchises)} className="text-gray-500 hover:text-amber-400">
+                  <Download className="w-4 h-4" />
+                </button>
+                <button title="Edit Schema" onClick={() => openEdit(sport)} className="text-gray-500 hover:text-white">
+                  <Edit2 className="w-4 h-4" />
+                </button>
+              </div>
+              <div className="flex flex-col md:flex-row md:items-center gap-3 mb-4 mt-2 md:mt-0">
                 <Icon className="w-6 h-6 text-amber-400" />
                 <div>
-                  <h3 className="font-semibold text-white">{sport.name}</h3>
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-semibold text-white">{sport.name}</h3>
+                    {sport.status === 'completed' && <span className="px-2 py-0.5 bg-green-500/20 text-green-400 text-[10px] rounded uppercase font-bold tracking-wider">Completed</span>}
+                  </div>
                   <span className="text-xs text-gray-400">{sport.gender === 'men' ? 'Men' : sport.gender === 'women' ? 'Women' : 'Mixed'}</span>
                 </div>
                 <div className="ml-auto flex items-center gap-4 text-xs text-gray-500 mr-8">

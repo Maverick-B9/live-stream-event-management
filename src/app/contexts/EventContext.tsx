@@ -221,7 +221,10 @@ export function EventProvider({ children }: { children: React.ReactNode }) {
     eventId?: string,
     eventName?: string
   ) => {
-    await addActivityLog({ userId, userName, action, eventId, eventName });
+    const payload: any = { userId, userName, action };
+    if (eventId) payload.eventId = eventId;
+    if (eventName) payload.eventName = eventName;
+    await addActivityLog(payload);
   };
 
   const uploadFile = async (file: File, path: string): Promise<string> => {
