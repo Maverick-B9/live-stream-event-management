@@ -7,7 +7,7 @@ import { Input } from '../../components/ui/input';
 import { toast } from 'sonner';
 import { ArrowLeft, Plus, X, Edit2, Wifi, WifiOff } from 'lucide-react';
 import type { AppUser } from '../../types';
-import { addDoc, collection } from 'firebase/firestore';
+import { addDoc, collection, onSnapshot, query, where } from 'firebase/firestore';
 import { db } from '../../../lib/firebase';
 
 export default function AdminCoordinatorsView() {
@@ -22,9 +22,8 @@ export default function AdminCoordinatorsView() {
 
   // Subscribe to coordinators
   React.useEffect(() => {
-    const { onSnapshot, collection: col, query, where } = require('firebase/firestore');
     const unsub = onSnapshot(
-      query(col(db, 'users'), where('role', '==', 'coordinator')),
+      query(collection(db, 'users'), where('role', '==', 'coordinator')),
       (snap: any) => {
         setCoordinators(snap.docs.map((d: any) => ({ uid: d.id, ...d.data() })));
       }

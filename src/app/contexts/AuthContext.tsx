@@ -1,8 +1,9 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from '../../lib/firebase';
+import { auth, db } from '../../lib/firebase';
 import { getUserDoc, updateUser } from '../lib/firestore';
 import { signInWithEmail, signOutUser } from '../../lib/firebase';
+import { collection, query, where, getDocs, setDoc, deleteDoc, doc } from 'firebase/firestore';
 import type { AppUser } from '../types';
 
 interface AuthContextType {
@@ -37,9 +38,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           let userData = await getUserDoc(firebaseUser.uid);
           
           if (!userData && firebaseUser.email) {
-            const { collection, query, where, getDocs, setDoc, deleteDoc, doc } = await import('firebase/firestore');
-            const { db } = await import('../../lib/firebase');
-            
             const q = query(collection(db, 'users'), where('email', '==', firebaseUser.email));
             const snapshot = await getDocs(q);
             if (!snapshot.empty) {
