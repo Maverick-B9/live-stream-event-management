@@ -328,29 +328,29 @@ export default function PublicDisplayView() {
       </div>
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col lg:flex-row w-full min-h-0 relative">
+      <main className="flex-1 w-full flex flex-col lg:flex-row overflow-hidden relative shadow-[0_0_50px_rgba(0,0,0,0.8)] z-10">
         {soonMatch && soonFranchiseA && soonFranchiseB && !activeStreamUrl ? (
-          <div className="flex-1 h-full">
+          <div className="w-full h-full">
             <CountdownWidget match={soonMatch} franchiseA={soonFranchiseA} franchiseB={soonFranchiseB} />
           </div>
         ) : (
-          <div className="flex-1 flex flex-col lg:flex-row w-full h-full relative z-10 shadow-[0_0_50px_rgba(0,0,0,0.8)]">
+          <div className="flex flex-col lg:flex-row flex-1 w-full h-full">
             {/* Left side: Video */}
             <div 
               ref={videoContainerRef}
-              className={`relative transition-all duration-500 ease-in-out group ${activeMatch && activeFranchiseA && activeFranchiseB ? 'flex-1 flex flex-col min-w-0 bg-black' : 'flex-1 flex flex-col min-w-0 w-full bg-black'}`}
+              className={`flex-1 flex flex-col min-w-0 bg-black relative ${activeMatch && activeFranchiseA && activeFranchiseB ? '' : 'w-full'}`}
             >
               <div className="flex-1 relative w-full overflow-hidden">
                 <VideoPlayer
                   streamUrl={activeStreamUrl}
                   status={activeStreamUrl ? 'playing' : 'idle'}
-                  className="absolute inset-0 w-full h-full object-contain"
+                  className="absolute inset-0 w-full h-full"
                 />
               </div>
               
               {/* Match Info Card Beneath Video */}
               {activeMatch && activeStreamUrl && (
-                <div className="bg-[#0e172c] border-t border-t-white/10 px-6 py-3.5 flex items-center justify-between shrink-0 shadow-[0_-10px_30px_rgba(0,0,0,0.5)] z-20">
+                <div className="bg-[#0e172c] border-t border-white/10 px-6 py-4 flex items-center justify-between shrink-0 shadow-[0_-10px_30px_rgba(0,0,0,0.5)] z-20">
                   <div className="flex items-center gap-5">
                     <div className="flex items-center gap-2">
                       <div className="w-2.5 h-2.5 rounded-full bg-red-600 animate-pulse shadow-[0_0_15px_red]"></div>
@@ -374,7 +374,7 @@ export default function PublicDisplayView() {
 
             {/* Score panel aligned perfectly next to the video */}
             {activeMatch && activeFranchiseA && activeFranchiseB && activeSport && (
-              <div className="w-full lg:w-[350px] lg:min-w-[350px] bg-[#060b18] border-t lg:border-t-0 lg:border-l border-white/5 flex flex-col shrink-0 relative z-30 shadow-2xl">
+              <div className="w-full lg:w-[350px] lg:min-w-[350px] bg-[#060b18] border-t lg:border-t-0 lg:border-l border-white/5 flex flex-col shrink-0 relative z-30">
                 <div className="flex border-b border-white/5 shrink-0">
                   {['all', 'cricket', 'football'].map(t => (
                     <button 
@@ -435,7 +435,7 @@ export default function PublicDisplayView() {
             )}
           </div>
         )}
-      </div>
+      </main>
 
       {/* Dual ticker */}
       <div className="shrink-0 border-t border-white/10 z-40 bg-black">
@@ -454,12 +454,15 @@ export default function PublicDisplayView() {
       </div>
 
       {/* Footer */}
-      <div className="bg-[#03060d] border-t border-white/5 py-4 text-center shrink-0 z-50">
-        <p className="text-[10px] text-gray-500 uppercase tracking-widest font-bold font-['Rajdhani']">
-          Developed by <span className="text-[#f0b429]">Balaram B.</span> <br />
-          <span className="opacity-50 text-[9px]">Department of Computer Science & Engineering</span>
+      <footer className="footer-premium py-5 text-center shrink-0 z-50 bg-[#03060d]/80 backdrop-blur-xl border-t border-white/5 relative">
+        <div className="absolute inset-0 bg-grid-white/[0.01] pointer-events-none" />
+        <p className="text-[10px] text-gray-500 uppercase tracking-[0.3em] font-bold font-['Rajdhani'] relative z-10 transition-all group hover:text-gray-400">
+           DESIGNED & DEVELOPED BY 
+           <span className="text-[#f0b429] drop-shadow-[0_0_10px_rgba(240,180,41,0.3)] ml-2 border-b border-[#f0b429]/20 pb-0.5">BALARAM B.</span>
+           <br />
+           <span className="opacity-40 text-[9px] mt-2 block tracking-[0.1em] font-medium">Department of Computer Science & Engineering</span>
         </p>
-      </div>
+      </footer>
     </div>
   );
 }
