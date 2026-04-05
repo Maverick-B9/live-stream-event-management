@@ -350,8 +350,8 @@ export default function PublicDisplayView() {
       </AnimatePresence>
 
       {/* Top bar (Desktop only) */}
-      {!isMobile && !isLandscape && (
-        <div className="flex items-center justify-between px-8 py-3 border-b border-white/5 z-10 shrink-0 bg-[#060b18]/60 backdrop-blur-xl relative">
+      {!isLandscape && (
+        <div className="hidden lg:flex items-center justify-between px-8 py-3 border-b border-white/5 z-10 shrink-0 bg-[#060b18]/60 backdrop-blur-xl relative">
           <div className="flex items-center gap-3">
             <EventLogo size="sm" />
             <h1 className="text-xl font-bold tracking-tight uppercase">{branding.eventName}</h1>
@@ -377,14 +377,14 @@ export default function PublicDisplayView() {
       )}
 
       {/* Main content */}
-      <main ref={broadcastRef} className={`flex-1 w-full flex ${isMobile && !isLandscape ? 'flex-col' : 'flex-row'} overflow-hidden relative z-10 bg-[#050810]`}>
+      <main ref={broadcastRef} className={`flex-1 w-full flex flex-col lg:flex-row overflow-hidden relative z-10 bg-[#050810] ${isLandscape ? '!flex-row' : ''}`}>
         {soonMatch && soonFranchiseA && soonFranchiseB && !activeStreamUrl ? (
           <div className="w-full h-full">
             <CountdownWidget match={soonMatch} franchiseA={soonFranchiseA} franchiseB={soonFranchiseB} />
           </div>
         ) : (
-          <div className="flex flex-1 overflow-hidden relative">
-            <div className={`relative flex flex-col min-w-0 bg-black ${isMobile && !isLandscape ? 'w-full aspect-video shrink-0 shadow-2xl z-20' : 'flex-1'} h-full`}>
+          <div className="flex flex-1 flex-col lg:flex-row overflow-hidden relative">
+            <div className={`relative flex flex-col min-w-0 bg-black ${isLandscape ? 'w-full h-full' : 'w-full aspect-video lg:aspect-auto lg:flex-1 h-auto lg:h-full'} shrink-0 shadow-2xl z-20 transition-all duration-500`}>
               <div className="flex-1 relative w-full overflow-hidden">
                 <VideoPlayer
                   streamUrl={activeStreamUrl}
@@ -448,13 +448,16 @@ export default function PublicDisplayView() {
             </div>
 
             {/* Content Side Section */}
-            {!isLandscape && !isFullscreen && (
-              <div className={`${isMobile ? 'flex-1 overflow-hidden' : 'w-[340px] border-l border-white/5 shadow-2xl'} flex flex-col bg-[#060b18]/40 backdrop-blur-3xl relative transition-all duration-300`}>
+            {!isFullscreen && (
+              <div className={`
+                ${isLandscape ? 'hidden' : 'flex'}
+                ${isMobile ? 'flex-1 min-h-0' : 'lg:w-[320px] lg:border-l lg:shadow-2xl'}
+                flex-col bg-[#060b18]/40 backdrop-blur-3xl relative transition-all duration-300
+              `}>
                 <div className="absolute inset-0 bg-gradient-to-b from-[#f0b429]/5 to-transparent pointer-events-none" />
                 
-                {isMobile ? (
-                /* Mobile Tabbed Interface */
-                <div className="flex flex-col h-full relative z-10">
+                <div className="flex flex-col h-full relative z-10 lg:hidden">
+                   {/* Mobile Tabbed Interface */}
                   <div className="flex border-b border-white/5 overflow-x-auto no-scrollbar shrink-0 bg-black/20">
                     {[
                       { id: 'live', label: 'Match Centre' },
@@ -534,9 +537,9 @@ export default function PublicDisplayView() {
                      </AnimatePresence>
                   </div>
                 </div>
-              ) : (
-                /* Desktop Side Panel */
-                <div className="flex flex-col h-full overflow-hidden relative z-10">
+
+                <div className="hidden lg:flex flex-col h-full overflow-hidden relative z-10">
+                   {/* Desktop Side Panel */}
                   <div className="p-8 border-b border-white/5 shrink-0 bg-white/5 flex items-center justify-between">
                     <div>
                       <h2 className="text-3xl font-black text-[#f0b429] uppercase tracking-wider font-['Bebas_Neue'] leading-none">Match Centre</h2>
@@ -596,7 +599,7 @@ export default function PublicDisplayView() {
 
       {/* Broadcaster News Tickers */}
       {!isLandscape && !isFullscreen && (
-        <div className="shrink-0 border-t border-white/10 z-40 bg-black shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
+        <div className="hidden lg:flex shrink-0 border-t border-white/10 z-40 bg-black shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
           <div className="flex h-12 bg-[#0a192f] items-stretch">
              <div className="bg-[#f0b429] px-6 flex items-center shrink-0 skew-x-[-15deg] ml-[-12px] z-10 border-r border-black/20 shadow-[5px_0_15px_rgba(0,0,0,0.3)]">
                 <span className="text-black font-black text-sm uppercase tracking-tighter skew-x-[15deg]">MAHADASARA 2026</span>
