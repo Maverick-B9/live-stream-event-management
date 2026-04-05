@@ -24,7 +24,7 @@ const EMPTY_SPORT: Omit<Sport, 'id'> = {
 };
 
 export default function AdminSportsView() {
-  const { sports, matches, franchises, updateSport, createSport } = useEvent();
+  const { sports, matches, franchises, updateSport, createSport, deleteSport } = useEvent();
   const [showModal, setShowModal] = useState(false);
   const [editSport, setEditSport] = useState<Sport | null>(null);
   const [form, setForm] = useState<Omit<Sport, 'id'>>({ ...EMPTY_SPORT });
@@ -66,6 +66,14 @@ export default function AdminSportsView() {
       newFields[index] = { ...newFields[index], ...changes };
       return { ...p, scoringSchema: { ...p.scoringSchema, fields: newFields } };
     });
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!window.confirm('Delete this sport schema? All matches for this sport will lose their scoring format.')) return;
+    try {
+      await deleteSport(id);
+      toast.success('Sport deleted.');
+    } catch { toast.error('Failed to delete.'); }
   };
 
   const handleSave = async () => {
@@ -115,6 +123,9 @@ export default function AdminSportsView() {
                 </button>
                 <button title="Edit Schema" onClick={() => openEdit(sport)} className="text-gray-500 hover:text-white">
                   <Edit2 className="w-4 h-4" />
+                </button>
+                <button title="Delete Sport" onClick={() => handleDelete(sport.id)} className="text-gray-500 hover:text-red-400">
+                  <Trash2 className="w-4 h-4" />
                 </button>
               </div>
               <div className="flex flex-col md:flex-row md:items-center gap-3 mb-4 mt-2 md:mt-0">

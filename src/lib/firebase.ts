@@ -48,10 +48,12 @@ export async function signOutUser() {
 }
 
 export async function createCoordinatorAuth(email: string, pass: string = 'Welcome@123') {
-  if (!firebaseReady) return;
+  if (!firebaseReady) return null;
   const secondaryApp = initializeApp(firebaseConfig, 'SecondaryApp' + Date.now());
   const secondaryAuth = getAuth(secondaryApp);
-  await createUserWithEmailAndPassword(secondaryAuth, email, pass);
+  const cred = await createUserWithEmailAndPassword(secondaryAuth, email, pass);
+  const uid = cred.user.uid;
   await signOut(secondaryAuth);
   await deleteApp(secondaryApp);
+  return uid;
 }

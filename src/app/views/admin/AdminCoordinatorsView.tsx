@@ -7,7 +7,7 @@ import { Input } from '../../components/ui/input';
 import { toast } from 'sonner';
 import { ArrowLeft, Plus, X, Edit2, Trash2, Wifi, WifiOff } from 'lucide-react';
 import type { AppUser } from '../../types';
-import { doc, updateDoc, deleteDoc, onSnapshot, collection, query, where, addDoc } from 'firebase/firestore';
+import { doc, updateDoc, deleteDoc, setDoc, collection, addDoc } from 'firebase/firestore';
 import { db, createCoordinatorAuth } from '../../../lib/firebase';
 
 export default function AdminCoordinatorsView() {
@@ -40,16 +40,19 @@ export default function AdminCoordinatorsView() {
          });
          toast.success('Coordinator updated!');
       } else {
-         await createCoordinatorAuth(newCoordEmail, 'Welcome@123');
-         await addDoc(collection(db, 'users'), {
-           email: newCoordEmail,
-           name: newCoordName,
-           role: 'coordinator',
-           assignedSportIds: selectedSports,
-           assignedEventIds: selectedEvents,
-           isOnline: false,
-         });
-         toast.success('Coordinator added! Default password is Welcome@123');
+          const uid = await createCoordinatorAuth(newCoordEmail, 'Welcome@123');
+          if (!uid) throw new Error('Failed to create auth');
+          
+          await setDoc(doc(db, 'users', uid), {
+            uid,
+            email: newCoordEmail,
+            name: newCoordName,
+            role: 'coordinator',
+            assignedSportIds: selectedSports,
+            assignedEventIds: selectedEvents,
+            isOnline: false,
+          });
+          toast.success('Coordinator added! Default password is Welcome@123');
       }
       setShowAddModal(false);
       setEditCoordId(null);

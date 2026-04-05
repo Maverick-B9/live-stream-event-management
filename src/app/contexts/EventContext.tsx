@@ -25,6 +25,7 @@ import {
   createMatch as fsCreateMatch,
   createFranchise as fsCreateFranchise,
   createSport as fsCreateSport,
+  deleteSport as fsDeleteSport,
 } from '../lib/firestore';
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { storage } from '../../lib/firebase';
@@ -69,6 +70,7 @@ interface EventContextType {
   createMatch: (data: Omit<Match, 'id'>) => Promise<void>;
   createFranchise: (data: Omit<Franchise, 'id'>) => Promise<void>;
   createSport: (data: Omit<Sport, 'id'>) => Promise<void>;
+  deleteSport: (id: string) => Promise<void>;
   logActivity: (userId: string, userName: string, action: string, eventId?: string, eventName?: string) => Promise<void>;
   uploadFile: (file: File, path: string) => Promise<string>;
 }
@@ -219,6 +221,10 @@ export function EventProvider({ children }: { children: React.ReactNode }) {
     await fsCreateSport(data);
   };
 
+  const deleteSportFn = async (id: string) => {
+    await fsDeleteSport(id);
+  };
+
   const logActivity = async (
     userId: string,
     userName: string,
@@ -262,6 +268,7 @@ export function EventProvider({ children }: { children: React.ReactNode }) {
         createMatch: createMatchFn,
         createFranchise: createFranchiseFn,
         createSport: createSportFn,
+        deleteSport: deleteSportFn,
         logActivity,
         uploadFile,
       }}

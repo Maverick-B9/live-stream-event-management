@@ -269,6 +269,11 @@ export async function createSport(data: any) {
   return addDoc(collection(db, 'sports'), data);
 }
 
+export async function deleteSport(id: string) {
+  const { deleteDoc } = await import('firebase/firestore');
+  return deleteDoc(doc(db, 'sports', id));
+}
+
 export async function updateUser(uid: string, data: Partial<any>) {
   return setDoc(doc(db, 'users', uid), data, { merge: true });
 }
@@ -308,8 +313,9 @@ export async function addActivityLog(entry: Omit<ActivityLogEntry, 'id' | 'times
 
 // ─── Default Sport Seeds ────────────────────────────────────────
 
-export const DEFAULT_SPORTS: Omit<Sport, 'id'>[] = [
+export const DEFAULT_SPORTS: (Omit<Sport, 'id'> & { id: string })[] = [
   {
+    id: 'cricket-men',
     name: 'Cricket',
     gender: 'men',
     icon: 'CircleDot',
@@ -328,6 +334,7 @@ export const DEFAULT_SPORTS: Omit<Sport, 'id'>[] = [
     },
   },
   {
+    id: 'kabaddi-men',
     name: 'Kabaddi',
     gender: 'men',
     icon: 'Swords',
@@ -345,6 +352,7 @@ export const DEFAULT_SPORTS: Omit<Sport, 'id'>[] = [
     },
   },
   {
+    id: 'football-men',
     name: 'Football',
     gender: 'men',
     icon: 'Circle',
@@ -362,6 +370,7 @@ export const DEFAULT_SPORTS: Omit<Sport, 'id'>[] = [
     },
   },
   {
+    id: 'tugofwar-women',
     name: 'Tug of War',
     gender: 'women',
     icon: 'ArrowLeftRight',
@@ -377,6 +386,7 @@ export const DEFAULT_SPORTS: Omit<Sport, 'id'>[] = [
     },
   },
   {
+    id: 'volleyball-men',
     name: 'Volleyball',
     gender: 'men',
     icon: 'Circle',
@@ -395,6 +405,7 @@ export const DEFAULT_SPORTS: Omit<Sport, 'id'>[] = [
     },
   },
   {
+    id: 'volleyball-women',
     name: 'Volleyball',
     gender: 'women',
     icon: 'Circle',
@@ -413,6 +424,7 @@ export const DEFAULT_SPORTS: Omit<Sport, 'id'>[] = [
     },
   },
   {
+    id: 'throwball-women',
     name: 'Throwball',
     gender: 'women',
     icon: 'Trophy',
@@ -433,9 +445,10 @@ export const DEFAULT_SPORTS: Omit<Sport, 'id'>[] = [
 ];
 
 export async function seedSportsIfEmpty(existingCount: number) {
-  if (existingCount > 0) return;
+  // We use setDoc with deterministic IDs to prevent duplicates regardless of the existing count.
   for (const sport of DEFAULT_SPORTS) {
-    await addDoc(collection(db, 'sports'), sport);
+    const { id, ...data } = sport;
+    await setDoc(doc(db, 'sports', id), data);
   }
 }
 

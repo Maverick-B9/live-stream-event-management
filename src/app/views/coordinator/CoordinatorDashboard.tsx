@@ -24,7 +24,21 @@ export default function CoordinatorDashboard() {
   const assignedSportIds = user?.assignedSportIds || [];
 
   // Get assigned matches and cultural events
-  const myMatches = matches.filter(m => assignedMatchIds.includes(m.id) || assignedSportIds.includes(m.sportId));
+  const myMatches = matches.filter(m => {
+    // Check by clear ID match
+    if (assignedMatchIds.includes(m.id)) return true;
+    if (assignedSportIds.includes(m.sportId)) return true;
+    
+    // Fallback for existing coordinators/duplicates: Check by Sport Name + Gender
+    const mSport = sports.find(s => s.id === m.sportId);
+    if (mSport) {
+      const isAssignedByName = sports
+        .filter(s => assignedSportIds.includes(s.id))
+        .some(s => s.name === mSport.name && s.gender === mSport.gender);
+      if (isAssignedByName) return true;
+    }
+    return false;
+  });
   const myCultural = culturalEvents.filter(e => assignedMatchIds.includes(e.id));
 
   // Group matches by sport
