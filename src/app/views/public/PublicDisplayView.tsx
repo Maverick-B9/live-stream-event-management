@@ -5,7 +5,7 @@ import { VideoPlayer } from '../../components/shared/VideoPlayer';
 import { NewsTicker } from '../../components/shared/NewsTicker';
 import { MatchCard } from '../../components/shared/MatchCard';
 import { EventLogo } from '../../components/shared/EventLogo';
-import { Wifi, WifiOff, Trophy, BarChart2, Share2, Users, Clock, Maximize, Minimize } from 'lucide-react';
+import { Wifi, WifiOff, Trophy, BarChart2, Share2, Users, Clock, Maximize, Minimize, Tv } from 'lucide-react';
 import { formatDistanceToNow, differenceInMinutes } from 'date-fns';
 import { toast } from 'sonner';
 import { ScoreBug } from '../../components/shared/ScoreBug';
@@ -344,10 +344,32 @@ export default function PublicDisplayView() {
         )}
       </AnimatePresence>
 
-      {/* Standings overlay */}
+      {/* Standsings overlay */}
       <AnimatePresence>
         {showStandings && <StandingsOverlay onClose={() => setShowStandings(false)} />}
       </AnimatePresence>
+      
+      {/* Premium Mobile Header (Logo + Live Badge) */}
+      {!isLandscape && (
+        <div className="lg:hidden flex items-center justify-between px-5 py-3 border-b border-white/5 bg-[#060b18]/80 backdrop-blur-3xl sticky top-0 z-[60] shrink-0">
+          <div className="flex items-center gap-2.5">
+            <EventLogo size="sm" />
+             <div className="flex flex-col">
+                <span className="text-[11px] font-black tracking-[0.3em] text-[#f0b429] uppercase leading-none">Mahadasara</span>
+                <span className="text-[9px] font-bold tracking-[0.1em] text-gray-500 uppercase mt-0.5">2026 OFFICIAL BROADCAST</span>
+             </div>
+          </div>
+          <div className="flex items-center gap-3">
+             <div className="flex items-center gap-1.5 bg-red-600/10 px-2.5 py-1 rounded-full border border-red-500/20">
+                <div className="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse" />
+                <span className="text-[9px] font-black text-red-500 uppercase tracking-widest">LIVE</span>
+             </div>
+             <button onClick={() => setShowStandings(true)} className="p-2 bg-white/5 rounded-lg border border-white/10">
+                <Trophy className="w-3.5 h-3.5 text-[#f0b429]" />
+             </button>
+          </div>
+        </div>
+      )}
 
       {/* Top bar (Desktop only) */}
       {!isLandscape && (
@@ -383,8 +405,11 @@ export default function PublicDisplayView() {
             <CountdownWidget match={soonMatch} franchiseA={soonFranchiseA} franchiseB={soonFranchiseB} />
           </div>
         ) : (
-          <div className="flex flex-1 flex-col lg:flex-row overflow-hidden relative">
-            <div className={`relative flex flex-col min-w-0 bg-black ${isLandscape ? 'w-full h-full' : 'w-full aspect-video lg:aspect-auto lg:flex-1 h-auto lg:h-full'} shrink-0 shadow-2xl z-20 transition-all duration-500`}>
+          <div className="flex flex-1 flex-col lg:flex-row overflow-y-auto lg:overflow-hidden relative no-scrollbar">
+            <div className={`
+                ${isLandscape ? 'w-full h-full' : 'w-full aspect-video lg:aspect-auto lg:flex-1 h-auto lg:h-full sticky top-0 z-[50] lg:relative'}
+                relative flex flex-col min-w-0 bg-black shrink-0 shadow-[0_10px_30px_rgba(0,0,0,0.5)] lg:shadow-none transition-all duration-500
+            `}>
               <div className="flex-1 relative w-full overflow-hidden">
                 <VideoPlayer
                   streamUrl={activeStreamUrl}
@@ -457,28 +482,31 @@ export default function PublicDisplayView() {
                 <div className="absolute inset-0 bg-gradient-to-b from-[#f0b429]/5 to-transparent pointer-events-none" />
                 
                 <div className="flex flex-col h-full relative z-10 lg:hidden">
-                   {/* Mobile Tabbed Interface */}
-                  <div className="flex border-b border-white/5 overflow-x-auto no-scrollbar shrink-0 bg-black/20">
+                   {/* Premium Mobile Navigation Tab Bar */}
+                  <div className="flex border-b border-white/5 bg-black/40 backdrop-blur-2xl px-2 shrink-0">
                     {[
-                      { id: 'live', label: 'Match Centre' },
-                      { id: 'scorecard', label: 'Statistics' },
-                      { id: 'upcoming', label: 'Schedule' },
-                    ].map(tab => (
+                      { id: 'live', label: 'Match Centre', icon: Tv },
+                      { id: 'scorecard', label: 'Statistics', icon: BarChart2 },
+                      { id: 'upcoming', label: 'Schedule', icon: Clock },
+                    ].map(tab => {
+                      const Icon = tab.icon;
+                      return (
                       <button
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id as any)}
-                        className={`flex-1 px-4 py-4 text-[10px] font-black uppercase tracking-[0.2em] transition-all relative ${
+                        className={`flex-1 flex flex-col items-center gap-1.5 px-2 py-4 transition-all relative ${
                           activeTab === tab.id ? 'text-[#f0b429]' : 'text-gray-500'
                         }`}
                       >
-                        {tab.label}
+                        <Icon className={`w-4 h-4 ${activeTab === tab.id ? 'animate-pulse' : ''}`} />
+                        <span className="text-[8px] font-black uppercase tracking-[0.2em]">{tab.label}</span>
                         {activeTab === tab.id && (
-                          <motion.div layoutId="tab-underline" className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#f0b429]" />
+                          <motion.div layoutId="tab-underline" className="absolute bottom-0 left-2 right-2 h-[2px] bg-[#f0b429] rounded-full" />
                         )}
                       </button>
-                    ))}
+                    )})}
                   </div>
-                  <div className="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar">
+                  <div className="flex-1 p-4 space-y-6 no-scrollbar">
                      <AnimatePresence mode="wait">
                         {activeTab === 'live' && activeMatch && activeFranchiseA && activeFranchiseB && activeSport && (
                           <motion.div 
@@ -588,14 +616,13 @@ export default function PublicDisplayView() {
                          </div>
                       </section>
                     )}
-                   </div>
-                 </div>
-               )}
-             </div>
-           )}
-         </div>
-       )}
-     </main>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </main>
 
       {/* Broadcaster News Tickers */}
       {!isLandscape && !isFullscreen && (

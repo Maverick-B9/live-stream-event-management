@@ -169,64 +169,69 @@ export function MatchCard({
   if (variant === 'compact') {
     return (
       <motion.div
-        className="bg-[#0e172c]/40 backdrop-blur-xl border border-white/10 rounded-2xl p-5 cursor-pointer min-w-[280px] relative overflow-hidden group shadow-2xl"
+        className="bg-white/5 backdrop-blur-3xl border border-white/10 rounded-3xl p-4 cursor-pointer min-w-[280px] relative overflow-hidden group shadow-2xl transition-all"
         animate={liveAnimation}
         transition={isLive ? { duration: 1.5, repeat: Infinity, repeatDelay: 2 } : {}}
         whileHover={{ scale: 1.02, y: -2 }}
         onClick={onClick}
       >
-        <div className="absolute inset-0 bg-gradient-to-tr from-[#f0b429]/5 to-transparent pointer-events-none" />
-        <div className="flex items-center justify-between mb-3 relative z-10">
+        <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-[#f0b429]/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+        <div className="flex items-center justify-between mb-4 relative z-10 px-1">
           <div className="flex items-center gap-2">
-            <SportIcon className="w-4 h-4 text-gray-400" />
-            <div className="flex items-center gap-1.5">
-              <span className="text-[10px] font-black uppercase text-white/90 tracking-tighter">{sport.name}</span>
-              <span className={`text-[9px] px-1.5 py-0.5 rounded font-black uppercase tracking-tighter ${
-                sport.gender === 'men' ? 'bg-blue-600/30 text-blue-400 border border-blue-500/30' : 
-                sport.gender === 'women' ? 'bg-rose-600/30 text-rose-400 border border-rose-500/30' : 
-                'bg-amber-600/30 text-amber-400 border border-amber-500/30'
-              }`}>
-                {sport.gender === 'men' ? "MEN'S" : sport.gender === 'women' ? "WOMEN'S" : 'MIXED'}
-              </span>
+            <div className="p-1.5 bg-white/5 rounded-lg border border-white/10">
+               <SportIcon className="w-3.5 h-3.5 text-[#f0b429]" />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-[10px] font-black uppercase text-white/90 tracking-tighter leading-none">{sport.name}</span>
+              <span className="text-[8px] text-gray-500 font-bold uppercase mt-0.5 tracking-widest">{sport.gender}</span>
             </div>
           </div>
           {isLive ? <LiveBadge /> : <StatusBadge status={match.status} />}
         </div>
 
-        <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4 relative z-10 mt-2">
           {/* Team A */}
-          <div className="flex items-center gap-3 flex-1 min-w-0">
+          <div className="flex flex-col items-center gap-2 flex-1">
             <div
-              className="w-10 h-12 rounded-t-lg rounded-b-[40%] flex items-center justify-center text-white text-sm font-bold shrink-0 border-2 border-white/30 shadow-[0_4px_10px_rgba(0,0,0,0.5)]"
+              className="w-12 h-12 rounded-2xl flex items-center justify-center text-white text-sm font-black shrink-0 border-2 border-white/10 shadow-2xl relative group-hover:scale-110 transition-transform"
               style={{ 
-                backgroundColor: franchiseA.color, 
-                boxShadow: `0 0 15px ${franchiseA.color}40`,
-                clipPath: 'polygon(0% 0%, 100% 0%, 100% 85%, 50% 100%, 0% 85%)'
+                backgroundColor: franchiseA.color,
+                boxShadow: `0 8px 15px ${franchiseA.color}40`
               }}
             >
-              {franchiseA.shortCode?.slice(0, 2) || franchiseA.name[0]}
+               <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent rounded-2xl" />
+               <span className="relative z-10">{franchiseA.shortCode || franchiseA.name[0]}</span>
             </div>
-            <span className="text-white text-base font-bold tracking-tight truncate font-['Rajdhani']">{franchiseA.name}</span>
+            <span className="text-[10px] font-black text-white/80 uppercase tracking-widest text-center truncate w-full">{franchiseA.shortCode || franchiseA.name}</span>
           </div>
-          <ScoreCell value={primaryA} live={isLive} color={franchiseA.color} />
-        </div>
 
-        <div className="flex items-center justify-between mt-1.5">
+          <div className="flex flex-col items-center justify-center min-w-[80px]">
+             <div className="flex items-center gap-1">
+                <ScoreCell value={primaryA} live={isLive} color={franchiseA.color} />
+                <span className="text-gray-600 font-black text-xl">:</span>
+                <ScoreCell value={primaryB} live={isLive} color={franchiseB.color} />
+             </div>
+             {match.currentPeriod && (
+               <div className="mt-1 text-[8px] text-amber-500 font-black uppercase tracking-[0.2em] animate-pulse">
+                  {match.currentPeriod}
+               </div>
+             )}
+          </div>
+
           {/* Team B */}
-          <div className="flex items-center gap-3 flex-1 min-w-0">
+          <div className="flex flex-col items-center gap-2 flex-1">
             <div
-              className="w-10 h-12 rounded-t-lg rounded-b-[40%] flex items-center justify-center text-white text-sm font-bold shrink-0 border-2 border-white/30 shadow-[0_4px_10px_rgba(0,0,0,0.5)]"
+              className="w-12 h-12 rounded-2xl flex items-center justify-center text-white text-sm font-black shrink-0 border-2 border-white/10 shadow-2xl relative group-hover:scale-110 transition-transform"
               style={{ 
-                backgroundColor: franchiseB.color, 
-                boxShadow: `0 0 15px ${franchiseB.color}40`,
-                clipPath: 'polygon(0% 0%, 100% 0%, 100% 85%, 50% 100%, 0% 85%)'
+                backgroundColor: franchiseB.color,
+                boxShadow: `0 8px 15px ${franchiseB.color}40`
               }}
             >
-              {franchiseB.shortCode?.slice(0, 2) || franchiseB.name[0]}
+               <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent rounded-2xl" />
+               <span className="relative z-10">{franchiseB.shortCode || franchiseB.name[0]}</span>
             </div>
-            <span className="text-white text-base font-bold tracking-tight truncate font-['Rajdhani']">{franchiseB.name}</span>
+            <span className="text-[10px] font-black text-white/80 uppercase tracking-widest text-center truncate w-full">{franchiseB.shortCode || franchiseB.name}</span>
           </div>
-          <ScoreCell value={primaryB} live={isLive} color={franchiseB.color} />
         </div>
 
         {match.currentPeriod && (
@@ -236,21 +241,23 @@ export function MatchCard({
         )}
 
         {sport.name.toLowerCase() === 'cricket' && isLive && match.matchEvents && match.matchEvents.length > 0 && (
-          <div className="mt-4 p-2 bg-black/40 rounded-lg border border-white/10">
-            <div className="flex justify-between text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1.5">
-              <span>RECENT EVENTS</span>
+          <div className="mt-5 p-3 bg-white/5 rounded-2xl border border-white/10 overflow-hidden relative">
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-transparent pointer-events-none" />
+            <div className="flex justify-between items-center text-[8px] text-gray-500 font-black uppercase tracking-[0.3em] mb-2 px-1">
+              <span>Timeline</span>
+              <span className="text-blue-500">Live Feedback</span>
             </div>
-            <div className="flex gap-1 h-2 w-full">
-              {match.matchEvents.slice(-6).map((ev, idx) => {
+            <div className="flex gap-1.5 h-2.5 w-full">
+              {match.matchEvents.slice(-8).map((ev, idx) => {
                 const desc = ev.description.toLowerCase();
-                let color = 'bg-gray-600';
-                if (desc.includes('boundary') || desc.includes('four') || desc.includes('six')) color = 'bg-green-500';
-                if (desc.includes('wicket')) color = 'bg-red-500 animate-pulse';
+                let color = 'bg-gray-700/50';
+                if (desc.includes('boundary') || desc.includes('four') || desc.includes('six')) color = 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]';
+                if (desc.includes('wicket')) color = 'bg-red-500 animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.5)]';
                 if (desc.includes('wide') || desc.includes('no ball')) color = 'bg-amber-500';
-                return <div key={idx} className={`flex-1 ${color} rounded-full`}></div>;
+                return <div key={idx} className={`flex-1 ${color} rounded-full transition-all duration-500`}></div>;
               })}
-              {Array.from({ length: Math.max(0, 6 - (match.matchEvents?.length || 0)) }).map((_, i) => (
-                 <div key={`empty-${i}`} className="flex-1 bg-white/5 rounded-full border border-white/10"></div>
+              {Array.from({ length: Math.max(0, 8 - (match.matchEvents?.length || 0)) }).map((_, i) => (
+                 <div key={`empty-${i}`} className="flex-1 bg-white/5 rounded-full border border-white/5"></div>
               ))}
             </div>
           </div>
@@ -311,45 +318,68 @@ export function MatchCard({
       </div>
 
       {/* Scores */}
-      <div className="space-y-3 mb-4">
+      <div className="flex items-center justify-between gap-4 py-8 relative">
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-8xl font-black text-white/[0.03] select-none pointer-events-none">VS</div>
+        
         {/* Team A */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div
-              className="w-14 h-16 rounded-t-lg rounded-b-[50%] flex items-center justify-center text-white text-lg font-bold shrink-0 border-2 border-white/20"
-              style={{ backgroundColor: franchiseA.color, boxShadow: `0 0 15px ${franchiseA.color}80` }}
-            >
-              {franchiseA.shortCode || franchiseA.name.slice(0, 3)}
-            </div>
-            <div>
-              <div className="text-white font-bold text-lg">{franchiseA.name}</div>
-              {match.winnerId === franchiseA.id && (
-                <span className="text-sm text-amber-400 font-bold uppercase tracking-wider drop-shadow-[0_0_5px_rgba(251,191,36,0.8)]">🏆 Winner</span>
-              )}
-            </div>
+        <div className="flex flex-col items-center gap-4 flex-1">
+          <div
+            className="w-24 h-28 rounded-t-2xl rounded-b-[40%] flex items-center justify-center text-white text-3xl font-black shrink-0 border-4 border-white/10 shadow-2xl relative overflow-hidden"
+            style={{ 
+              backgroundColor: franchiseA.color, 
+              boxShadow: `0 15px 30px ${franchiseA.color}40`,
+              clipPath: 'polygon(0% 0%, 100% 0%, 100% 85%, 50% 100%, 0% 85%)'
+            }}
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent" />
+            <span className="relative z-10">{franchiseA.shortCode || franchiseA.name.slice(0, 3)}</span>
           </div>
-          <ScoreCell value={primaryA} live={isLive} />
+          <div className="text-center">
+            <div className="text-white font-black text-xl uppercase tracking-tighter mix-blend-difference">{franchiseA.name}</div>
+            {match.winnerId === franchiseA.id && (
+              <span className="text-xs text-amber-500 font-black uppercase tracking-[0.4em] flex items-center justify-center gap-2 mt-1">
+                <Icons.Trophy className="w-3 h-3" /> MATCH WINNER
+              </span>
+            )}
+          </div>
         </div>
 
-        <div className="border-t border-gray-700" />
+        <div className="flex flex-col items-center justify-center gap-2 min-w-[120px] bg-white/5 backdrop-blur-3xl p-6 rounded-3xl border border-white/10 shadow-2xl relative z-10">
+           <div className="text-[10px] font-black text-[#f0b429] uppercase tracking-[0.5em] mb-1">SCORE</div>
+           <div className="flex items-center gap-3">
+              <ScoreCell value={primaryA} live={isLive} color={franchiseA.color} />
+              <span className="text-gray-700 font-bold text-3xl">-</span>
+              <ScoreCell value={primaryB} live={isLive} color={franchiseB.color} />
+           </div>
+           {match.currentPeriod && (
+              <div className="mt-2 flex items-center gap-1.5 bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20">
+                <div className="w-1 h-1 rounded-full bg-amber-500 animate-ping" />
+                <span className="text-[9px] font-black text-amber-500 uppercase tracking-widest">{match.currentPeriod}</span>
+              </div>
+           )}
+        </div>
 
         {/* Team B */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div
-              className="w-14 h-16 rounded-t-lg rounded-b-[50%] flex items-center justify-center text-white text-lg font-bold shrink-0 border-2 border-white/20"
-              style={{ backgroundColor: franchiseB.color, boxShadow: `0 0 15px ${franchiseB.color}80` }}
-            >
-              {franchiseB.shortCode || franchiseB.name.slice(0, 3)}
-            </div>
-            <div>
-              <div className="text-white font-bold text-lg">{franchiseB.name}</div>
-              {match.winnerId === franchiseB.id && (
-                <span className="text-sm text-amber-400 font-bold uppercase tracking-wider drop-shadow-[0_0_5px_rgba(251,191,36,0.8)]">🏆 Winner</span>
-              )}
-            </div>
+        <div className="flex flex-col items-center gap-4 flex-1">
+          <div
+            className="w-24 h-28 rounded-t-2xl rounded-b-[40%] flex items-center justify-center text-white text-3xl font-black shrink-0 border-4 border-white/10 shadow-2xl relative overflow-hidden"
+            style={{ 
+              backgroundColor: franchiseB.color, 
+              boxShadow: `0 15px 30px ${franchiseB.color}40`,
+              clipPath: 'polygon(0% 0%, 100% 0%, 100% 85%, 50% 100%, 0% 85%)'
+            }}
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent" />
+            <span className="relative z-10">{franchiseB.shortCode || franchiseB.name.slice(0, 3)}</span>
           </div>
-          <ScoreCell value={primaryB} live={isLive} />
+          <div className="text-center">
+            <div className="text-white font-black text-xl uppercase tracking-tighter mix-blend-difference">{franchiseB.name}</div>
+            {match.winnerId === franchiseB.id && (
+              <span className="text-xs text-amber-500 font-black uppercase tracking-[0.4em] flex items-center justify-center gap-2 mt-1">
+                <Icons.Trophy className="w-3 h-3" /> MATCH WINNER
+              </span>
+            )}
+          </div>
         </div>
       </div>
 
