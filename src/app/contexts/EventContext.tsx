@@ -10,6 +10,7 @@ import {
   subscribeCulturalEvents,
   subscribeStreamRequests,
   subscribeActivityLog,
+  subscribeCoordinators,
   updateMatch as fsUpdateMatch,
   updateCulturalEvent as fsUpdateCulturalEvent,
   updateSettings,
@@ -53,6 +54,7 @@ interface EventContextType {
   culturalEvents: CulturalEvent[];
   streamRequests: StreamRequest[];
   activityLog: ActivityLogEntry[];
+  coordinators: AppUser[];
   isOffline: boolean;
   // Actions
   updateMatch: (id: string, data: Partial<Match>) => Promise<void>;
@@ -81,6 +83,7 @@ export function EventProvider({ children }: { children: React.ReactNode }) {
   const [culturalEvents, setCulturalEvents] = useState<CulturalEvent[]>([]);
   const [streamRequests, setStreamRequests] = useState<StreamRequest[]>([]);
   const [activityLog, setActivityLog] = useState<ActivityLogEntry[]>([]);
+  const [coordinators, setCoordinators] = useState<AppUser[]>([]);
   const [isOffline, setIsOffline] = useState(false);
   const seededRef = useRef(false);
 
@@ -115,6 +118,7 @@ export function EventProvider({ children }: { children: React.ReactNode }) {
       unsubCultural = subscribeCulturalEvents(setCulturalEvents);
       unsubRequests = subscribeStreamRequests(setStreamRequests);
       unsubActivity = subscribeActivityLog(setActivityLog);
+      const unsubCoords = subscribeCoordinators(setCoordinators);
 
       unsubSports = subscribeSports((list) => {
         setSports(list);
@@ -124,19 +128,20 @@ export function EventProvider({ children }: { children: React.ReactNode }) {
           seedSettingsIfMissing().catch(console.error);
         }
       });
+      
+      return () => {
+        unsubSettings();
+        unsubFranchises();
+        unsubSports();
+        unsubMatches();
+        unsubCultural();
+        unsubRequests();
+        unsubActivity();
+        unsubCoords();
+      };
     } catch (err) {
       console.error('Firestore subscription error:', err);
     }
-
-    return () => {
-      unsubSettings();
-      unsubFranchises();
-      unsubSports();
-      unsubMatches();
-      unsubCultural();
-      unsubRequests();
-      unsubActivity();
-    };
   }, []);
 
   // ── Actions ─────────────────────────────────────────────────
@@ -243,6 +248,7 @@ export function EventProvider({ children }: { children: React.ReactNode }) {
         culturalEvents,
         streamRequests,
         activityLog,
+        coordinators,
         isOffline,
         updateMatch: updateMatchFn,
         updateCulturalEvent: updateCulturalEventFn,

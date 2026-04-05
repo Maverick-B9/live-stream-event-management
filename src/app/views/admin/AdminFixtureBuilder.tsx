@@ -31,7 +31,7 @@ const EMPTY_MATCH = {
 };
 
 export default function AdminFixtureBuilder() {
-  const { matches, sports, franchises, createMatch, updateMatch, logActivity, branding } = useEvent();
+  const { matches, sports, franchises, coordinators, createMatch, updateMatch, logActivity, branding } = useEvent();
   const { user } = useAuth();
   const [showModal, setShowModal] = useState(false);
   const [editMatch, setEditMatch] = useState<Partial<Match> | null>(null);
@@ -66,12 +66,13 @@ export default function AdminFixtureBuilder() {
     setLoading(true);
     try {
       const dateTime = new Date(`${dateStr}T${timeStr || '00:00'}`);
-      const matchData = { ...form, dateTime };
+      const { id, ...pureData } = { ...form, dateTime } as any;
+      
       if (editMatch?.id) {
-        await updateMatch(editMatch.id, matchData);
+        await updateMatch(editMatch.id, pureData);
         toast.success('Match updated!');
       } else {
-        await createMatch(matchData as Omit<Match, 'id'>);
+        await createMatch(pureData as Omit<Match, 'id'>);
         toast.success('Match created!');
       }
       if (user) await logActivity(user.uid, user.name, editMatch?.id ? 'Updated match' : 'Created match');
@@ -111,6 +112,7 @@ export default function AdminFixtureBuilder() {
                 <th className="text-left px-4 py-3">Match</th>
                 <th className="text-left px-4 py-3">Date & Time</th>
                 <th className="text-left px-4 py-3">Venue</th>
+                <th className="text-left px-4 py-3">Coordinator</th>
                 <th className="text-left px-4 py-3">Status</th>
                 <th className="text-right px-4 py-3">Actions</th>
               </tr>
@@ -143,6 +145,9 @@ export default function AdminFixtureBuilder() {
                     </td>
                     <td className="px-4 py-3 text-gray-400 text-xs">{format(m.dateTime, 'MMM d, h:mm a')}</td>
                     <td className="px-4 py-3 text-gray-400 text-xs">{m.venue}</td>
+                    <td className="px-4 py-3 text-gray-400 text-xs">
+                      {coordinators.find(c => c.uid === m.coordinatorId)?.name || 'Auto (By Sport)'}
+                    </td>
                     <td className="px-4 py-3"><StatusBadge status={m.status} /></td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex justify-end gap-2">
@@ -226,6 +231,16 @@ export default function AdminFixtureBuilder() {
               placeholder="Venue"
               className="bg-gray-800 border-gray-600 text-white"
             />
+
+            <div>
+              <label className="text-xs text-gray-400 block mb-1">Coordinator (Optional)</label>
+              <select value={form.coordinatorId} onChange={e => setForm(p => ({ ...p, coordinatorId: e.target.value }))}
+                className="w-full bg-gray-800 border-gray-600 text-white text-sm rounded px-2 py-1.5">
+                <option value="">Auto-Allot (By Sport)</option>
+                {coordinators.map(c => <option key={c.uid} value={c.uid}>{c.name}</option>)}
+              </select>
+              <p className="text-[10px] text-gray-500 mt-1">If left unassigned, all coordinators for this sport will see this match.</p>
+            </div>
 
             <Button onClick={handleSave} disabled={loading} className="w-full bg-amber-500 text-black hover:bg-amber-400 font-semibold">
               {loading ? 'Saving...' : editMatch ? 'Update Match' : 'Create Match'}

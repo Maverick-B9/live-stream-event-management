@@ -11,6 +11,7 @@ import {
   serverTimestamp,
   Timestamp,
   getDoc,
+  where,
 } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import type {
@@ -183,6 +184,15 @@ export function subscribeCulturalEvents(cb: (list: CulturalEvent[]) => void) {
   return onSnapshot(collection(db, 'culturalEvents'), snap => {
     cb(snap.docs.map(d => culturalFromDoc(d.id, d.data())));
   });
+}
+
+export function subscribeCoordinators(cb: (list: AppUser[]) => void) {
+  return onSnapshot(
+    query(collection(db, 'users'), where('role', '==', 'coordinator')),
+    (snap: any) => {
+      cb(snap.docs.map((d: any) => ({ uid: d.id, ...d.data() })));
+    }
+  );
 }
 
 export function subscribeStreamRequests(cb: (list: StreamRequest[]) => void) {

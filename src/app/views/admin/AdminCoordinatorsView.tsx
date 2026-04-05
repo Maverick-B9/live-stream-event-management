@@ -11,8 +11,7 @@ import { doc, updateDoc, deleteDoc, onSnapshot, collection, query, where, addDoc
 import { db, createCoordinatorAuth } from '../../../lib/firebase';
 
 export default function AdminCoordinatorsView() {
-  const { sports, matches, culturalEvents } = useEvent();
-  const [coordinators, setCoordinators] = useState<AppUser[]>([]);
+  const { sports, matches, culturalEvents, coordinators } = useEvent();
   const [showAddModal, setShowAddModal] = useState(false);
   const [newCoordEmail, setNewCoordEmail] = useState('');
   const [newCoordName, setNewCoordName] = useState('');
@@ -21,16 +20,7 @@ export default function AdminCoordinatorsView() {
   const [editCoordId, setEditCoordId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // Subscribe to coordinators
-  React.useEffect(() => {
-    const unsub = onSnapshot(
-      query(collection(db, 'users'), where('role', '==', 'coordinator')),
-      (snap: any) => {
-        setCoordinators(snap.docs.map((d: any) => ({ uid: d.id, ...d.data() })));
-      }
-    );
-    return unsub;
-  }, []);
+
 
   const allEvents = [
     ...matches.map(m => ({ id: m.id, label: `Match: ${m.id}` })),

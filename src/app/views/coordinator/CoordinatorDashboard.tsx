@@ -1,23 +1,30 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router';
+import { useNavigate } from 'react-router';
 import { motion } from 'motion/react';
+import { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useEvent } from '../../contexts/EventContext';
 import { StatusBadge } from '../../components/shared/StatusBadge';
 import { EventLogo } from '../../components/shared/EventLogo';
-import { LogOut, Calendar, Music } from 'lucide-react';
+import { LogOut, Calendar, Music, MessageSquare, Plus, Trash2, Tag, Wifi } from 'lucide-react';
+import { toast } from 'sonner';
 import * as Icons from 'lucide-react';
 import { format } from 'date-fns';
 
 export default function CoordinatorDashboard() {
   const { user, signOut } = useAuth();
-  const { matches, culturalEvents, franchises, sports, branding } = useEvent();
+  const { matches, culturalEvents, franchises, sports, branding, updateBranding, updateMatch } = useEvent();
   const navigate = useNavigate();
 
+  const [newGlobalHeadline, setNewGlobalHeadline] = useState('');
+  const [matchHeadlines, setMatchHeadlines] = useState<Record<string, string>>({});
+  const [updating, setUpdating] = useState(false);
+
   const assignedMatchIds = user?.assignedEventIds || [];
+  const assignedSportIds = user?.assignedSportIds || [];
 
   // Get assigned matches and cultural events
-  const myMatches = matches.filter(m => assignedMatchIds.includes(m.id));
+  const myMatches = matches.filter(m => assignedMatchIds.includes(m.id) || assignedSportIds.includes(m.sportId));
   const myCultural = culturalEvents.filter(e => assignedMatchIds.includes(e.id));
 
   // Group matches by sport
@@ -152,9 +159,155 @@ export default function CoordinatorDashboard() {
                 </div>
               </div>
             )}
+            {/* Headlines Section */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-6 border-t border-white/10">
+              {/* Global Headlines */}
+              <div className="bg-gray-900 border border-gray-700 rounded-xl p-5 space-y-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <Tag className="w-5 h-5 text-amber-400" />
+                  <h3 className="font-bold text-white">Global Event Ticker</h3>
+                </div>
+                <div className="flex gap-2">
+                  <input
+                    value={newGlobalHeadline}
+                    onChange={e => setNewGlobalHeadline(e.target.value)}
+                    placeholder="Add global headline..."
+                    className="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-amber-500"
+                    onKeyDown={e => e.key === 'Enter' && handleAddGlobalHeadline()}
+                  />
+                  <button
+                    onClick={handleAddGlobalHeadline}
+                    disabled={!newGlobalHeadline.trim() || updating}
+                    className="bg-amber-500 hover:bg-amber-400 text-black p-2 rounded-lg disabled:opacity-50"
+                  >
+                    <Plus className="w-5 h-5" />
+                  </button>
+                </div>
+                <div className="space-y-2 max-h-48 overflow-y-auto pr-2">
+                  {branding.globalTickerHeadlines.map((h, i) => (
+                    <div key={i} className="flex items-center justify-between bg-gray-800/50 border border-gray-700 rounded-lg px-3 py-2">
+                      <span className="text-sm text-gray-300 truncate mr-2">{h}</span>
+                      <button
+                        onClick={() => handleRemoveGlobalHeadline(i)}
+                        className="text-gray-500 hover:text-red-400 transition-colors"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                  {branding.globalTickerHeadlines.length === 0 && (
+                    <p className="text-xs text-gray-600 text-center py-4">No global headlines active</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Live Match Headlines */}
+              <div className="bg-gray-900 border border-gray-700 rounded-xl p-5 space-y-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <Wifi className="w-5 h-5 text-red-500" />
+                  <h3 className="font-bold text-white">Live Match Updates</h3>
+                </div>
+                
+                {myMatches.filter(m => m.status === 'live').length === 0 ? (
+                  <p className="text-sm text-gray-600 py-4 text-center">No matches currently live</p>
+                ) : (
+                  <div className="space-y-4 max-h-64 overflow-y-auto pr-2">
+                    {myMatches.filter(m => m.status === 'live').map(m => {
+                      const fa = franchises.find(f => f.id === m.franchiseAId);
+                      const fb = franchises.find(f => f.id === m.franchiseBId);
+                      return (
+                        <div key={m.id} className="space-y-2 bg-gray-800/30 p-3 rounded-lg border border-gray-700">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-bold text-amber-500 uppercase">
+                              {fa?.shortCode} vs {fb?.shortCode}
+                            </span>
+                            <MessageSquare className="w-3 h-3 text-gray-600" />
+                          </div>
+                          <div className="flex gap-2">
+                            <input
+                              value={matchHeadlines[m.id] || ''}
+                              onChange={e => setMatchHeadlines(p => ({ ...p, [m.id]: e.target.value }))}
+                              placeholder="Match headline..."
+                              className="flex-1 bg-gray-800 border border-gray-700 rounded px-2 py-1 text-xs text-white"
+                              onKeyDown={e => e.key === 'Enter' && handleAddMatchHeadline(m.id)}
+                            />
+                            <button
+                              onClick={() => handleAddMatchHeadline(m.id)}
+                              disabled={!matchHeadlines[m.id]?.trim() || updating}
+                              className="bg-gray-700 hover:bg-gray-600 text-white px-2 py-1 rounded"
+                            >
+                              <Plus className="w-4 h-4" />
+                            </button>
+                          </div>
+                          <div className="flex flex-wrap gap-1">
+                            {(m.tickerHeadlines || []).map((h, idx) => (
+                              <div key={idx} className="flex items-center gap-1 bg-blue-500/10 border border-blue-500/20 rounded px-1.5 py-0.5 text-[10px] text-blue-400">
+                                <span className="truncate max-w-[100px]">{h}</span>
+                                <button onClick={() => handleRemoveMatchHeadline(m.id, idx)} className="hover:text-white">×</button>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </div>
           </>
         )}
       </div>
     </div>
   );
+
+  async function handleAddGlobalHeadline() {
+    if (!newGlobalHeadline.trim()) return;
+    setUpdating(true);
+    try {
+      await updateBranding({ 
+        globalTickerHeadlines: [...branding.globalTickerHeadlines, newGlobalHeadline.trim()] 
+      });
+      setNewGlobalHeadline('');
+      toast.success('Global headline added');
+    } catch { toast.error('Failed to update ticker'); }
+    finally { setUpdating(true); }
+  }
+
+  async function handleRemoveGlobalHeadline(idx: number) {
+    setUpdating(true);
+    try {
+      await updateBranding({ 
+        globalTickerHeadlines: branding.globalTickerHeadlines.filter((_, i) => i !== idx) 
+      });
+    } catch { toast.error('Failed to remove'); }
+    finally { setUpdating(true); }
+  }
+
+  async function handleAddMatchHeadline(matchId: string) {
+    const text = matchHeadlines[matchId]?.trim();
+    if (!text) return;
+    setUpdating(true);
+    try {
+      const match = matches.find(m => m.id === matchId);
+      if (!match) return;
+      await updateMatch(matchId, {
+        tickerHeadlines: [...(match.tickerHeadlines || []), text]
+      });
+      setMatchHeadlines(p => ({ ...p, [matchId]: '' }));
+      toast.success('Update sent to ticker');
+    } catch { toast.error('Failed to update match ticker'); }
+    finally { setUpdating(true); }
+  }
+
+  async function handleRemoveMatchHeadline(matchId: string, idx: number) {
+    setUpdating(true);
+    try {
+      const match = matches.find(m => m.id === matchId);
+      if (!match) return;
+      await updateMatch(matchId, {
+        tickerHeadlines: match.tickerHeadlines.filter((_, i) => i !== idx)
+      });
+    } catch { toast.error('Failed to remove'); }
+    finally { setUpdating(true); }
+  }
 }
