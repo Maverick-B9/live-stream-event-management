@@ -268,7 +268,7 @@ export default function PublicDisplayView() {
   };
 
   return (
-    <div className="h-screen w-full flex flex-col bg-[#060b18] text-white relative font-['Rajdhani'] overflow-hidden">
+    <div className="min-h-screen lg:h-screen w-full flex flex-col bg-[#060b18] text-white relative font-['Rajdhani'] lg:overflow-hidden overflow-auto">
       {/* Winner announcement overlay */}
       <AnimatePresence>
         {winnerMatch && winnerFranchise && (
@@ -309,11 +309,11 @@ export default function PublicDisplayView() {
         <div className="flex items-center gap-6">
           <button
             onClick={() => setShowStandings(true)}
-            className="flex items-center gap-2 text-sm font-bold text-[#f0b429] border border-[#f0b429]/30 hover:border-[#f0b429] hover:bg-[#f0b429]/10 rounded-lg px-5 py-2 transition-all uppercase tracking-widest shadow-[0_0_15px_rgba(240,180,41,0.1)]"
+            className="flex items-center gap-2 text-xs md:text-sm font-bold text-[#f0b429] border border-[#f0b429]/30 hover:border-[#f0b429] hover:bg-[#f0b429]/10 rounded-lg px-3 md:px-5 py-2 transition-all uppercase tracking-widest shadow-[0_0_15px_rgba(240,180,41,0.1)]"
           >
-            <BarChart2 className="w-4 h-4" /> Standings
+            <BarChart2 className="w-4 h-4" /> <span className="hidden sm:inline">Standings</span>
           </button>
-          <div className="flex items-center gap-4 border-l border-white/10 pl-6 h-10">
+          <div className="hidden md:flex items-center gap-4 border-l border-white/10 pl-6 h-10">
             <Clock className="w-5 h-5 text-gray-500" />
             <div className="text-right">
               <div className="text-[10px] text-gray-500 uppercase font-bold tracking-tighter">
@@ -328,7 +328,7 @@ export default function PublicDisplayView() {
       </div>
 
       {/* Main content */}
-      <main className="flex-1 w-full flex flex-col lg:flex-row overflow-hidden relative shadow-[0_0_50px_rgba(0,0,0,0.8)] z-10">
+      <main className="flex-1 w-full flex flex-col lg:flex-row lg:overflow-hidden relative shadow-[0_0_50px_rgba(0,0,0,0.8)] z-10 overflow-auto">
         {soonMatch && soonFranchiseA && soonFranchiseB && !activeStreamUrl ? (
           <div className="w-full h-full">
             <CountdownWidget match={soonMatch} franchiseA={soonFranchiseA} franchiseB={soonFranchiseB} />
@@ -338,7 +338,7 @@ export default function PublicDisplayView() {
             {/* Left side: Video */}
             <div 
               ref={videoContainerRef}
-              className={`flex-1 flex flex-col min-w-0 bg-black relative ${activeMatch && activeFranchiseA && activeFranchiseB ? '' : 'w-full'}`}
+              className={`flex-none aspect-video lg:aspect-auto lg:flex-1 flex flex-col min-w-0 bg-black relative ${activeMatch && activeFranchiseA && activeFranchiseB ? '' : 'w-full'}`}
             >
               <div className="flex-1 relative w-full overflow-hidden">
                 <VideoPlayer

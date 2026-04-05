@@ -124,7 +124,10 @@ export default function AdminCoordinatorsView() {
                   <td className="px-4 py-3 font-medium text-white">{c.name}</td>
                   <td className="px-4 py-3 text-gray-400">{c.email}</td>
                   <td className="px-4 py-3 text-gray-400 text-xs">
-                    {(c.assignedSportIds || []).map(sid => sports.find(s => s.id === sid)?.name || sid).join(', ') || '—'}
+                    {(c.assignedSportIds || []).map(sid => {
+                      const sp = sports.find(s => s.id === sid);
+                      return sp ? `${sp.name} (${sp.gender === 'men' ? 'Men' : sp.gender === 'women' ? 'Women' : 'Mixed'})` : sid;
+                    }).join(', ') || '—'}
                   </td>
                   <td className="px-4 py-3 text-gray-400 text-xs">{(c.assignedEventIds || []).length} events</td>
                   <td className="px-4 py-3 text-center">
@@ -175,7 +178,7 @@ export default function AdminCoordinatorsView() {
                 {sports.map(s => (
                   <button key={s.id} onClick={() => setSelectedSports(prev => prev.includes(s.id) ? prev.filter(x => x !== s.id) : [...prev, s.id])}
                     className={`px-2 py-0.5 rounded text-xs border ${selectedSports.includes(s.id) ? 'border-amber-500 text-amber-400 bg-amber-500/10' : 'border-gray-700 text-gray-400'}`}>
-                    {s.name}
+                    {s.name} ({s.gender === 'men' ? 'Men' : s.gender === 'women' ? 'Women' : 'Mixed'})
                   </button>
                 ))}
               </div>

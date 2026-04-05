@@ -106,7 +106,7 @@ export default function AdminSportsView() {
           const schema = sport.scoringSchema;
           return (
             <div key={sport.id} className="bg-gray-900 border border-gray-700 rounded-xl p-5 group relative">
-              <div className="absolute top-4 right-4 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="absolute top-4 right-4 flex items-center gap-3 transition-opacity">
                 <button title={sport.status === 'completed' ? "Reopen Sport" : "Mark Completed"} onClick={() => updateSport(sport.id, { status: sport.status === 'completed' ? 'active' : 'completed' })} className="text-gray-500 hover:text-green-400">
                   <Icons.CheckCircle className={`w-4 h-4 ${sport.status === 'completed' ? 'text-green-400' : ''}`} />
                 </button>
