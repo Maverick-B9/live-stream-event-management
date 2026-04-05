@@ -5,7 +5,7 @@ import { VideoPlayer } from '../../components/shared/VideoPlayer';
 import { NewsTicker } from '../../components/shared/NewsTicker';
 import { MatchCard } from '../../components/shared/MatchCard';
 import { EventLogo } from '../../components/shared/EventLogo';
-import { Wifi, WifiOff, Trophy, BarChart2, Share2, Users, Clock } from 'lucide-react';
+import { Wifi, WifiOff, Trophy, BarChart2, Share2, Users, Clock, Maximize, Minimize } from 'lucide-react';
 import { formatDistanceToNow, differenceInMinutes } from 'date-fns';
 import { toast } from 'sonner';
 import { ScoreBug } from '../../components/shared/ScoreBug';
@@ -252,18 +252,26 @@ export default function PublicDisplayView() {
   const [activeTab, setActiveTab] = useState<'live' | 'scorecard' | 'upcoming' | 'info'>('live');
   const [isMobile, setIsMobile] = useState(false);
   const [isLandscape, setIsLandscape] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const prevStatusesRef = useRef<Record<string, string>>({});
+  const broadcastRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const checkLayout = () => {
-      const mobile = window.innerWidth < 1024;
-      setIsMobile(mobile);
-      setIsLandscape(window.innerWidth > window.innerHeight && mobile);
-    };
-    checkLayout();
-    window.addEventListener('resize', checkLayout);
-    return () => window.removeEventListener('resize', checkLayout);
+    const handleFsChange = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener('fullscreenchange', handleFsChange);
+    return () => document.removeEventListener('fullscreenchange', handleFsChange);
   }, []);
+
+  const toggleFullscreen = () => {
+    if (!broadcastRef.current) return;
+    if (!document.fullscreenElement) {
+      broadcastRef.current.requestFullscreen().catch(err => {
+        toast.error("Fullscreen error", { description: err.message });
+      });
+    } else {
+      document.exitFullscreen();
+    }
+  };
 
   useEffect(() => {
     const t = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -369,15 +377,14 @@ export default function PublicDisplayView() {
       )}
 
       {/* Main content */}
-      <main className={`flex-1 w-full flex ${isMobile && !isLandscape ? 'flex-col' : 'flex-row'} overflow-hidden relative z-10`}>
+      <main ref={broadcastRef} className={`flex-1 w-full flex ${isMobile && !isLandscape ? 'flex-col' : 'flex-row'} overflow-hidden relative z-10 bg-[#050810]`}>
         {soonMatch && soonFranchiseA && soonFranchiseB && !activeStreamUrl ? (
           <div className="w-full h-full">
             <CountdownWidget match={soonMatch} franchiseA={soonFranchiseA} franchiseB={soonFranchiseB} />
           </div>
         ) : (
-          <>
-            {/* Video Canvas Section */}
-            <div className={`relative flex flex-col min-w-0 bg-black ${isMobile ? 'w-full aspect-video shrink-0 shadow-2xl z-20' : 'flex-1'}`}>
+          <div className="flex flex-1 overflow-hidden relative">
+            <div className={`relative flex flex-col min-w-0 bg-black ${isMobile && !isLandscape ? 'w-full aspect-video shrink-0 shadow-2xl z-20' : 'flex-1'} h-full`}>
               <div className="flex-1 relative w-full overflow-hidden">
                 <VideoPlayer
                   streamUrl={activeStreamUrl}
@@ -395,14 +402,42 @@ export default function PublicDisplayView() {
                   />
                 )}
                 
+                {/* Custom Fullscreen / Minimize Toggle */}
+                <button
+                  onClick={toggleFullscreen}
+                  className="absolute bottom-4 left-4 z-50 bg-black/40 backdrop-blur-md p-2.5 rounded-xl border border-white/10 hover:bg-[#f0b429] hover:text-black transition-all group scale-75 sm:scale-100"
+                  title={isFullscreen ? "Exit Reality" : "Immersive View"}
+                >
+                  {isFullscreen ? <Minimize className="w-5 h-5" /> : <Maximize className="w-5 h-5" />}
+                </button>
+                
                 {/* Event Watermark */}
-                <div className="absolute bottom-6 right-6 opacity-30 pointer-events-none">
+                <div className="absolute bottom-6 right-6 opacity-30 pointer-events-none hidden sm:block">
                    <EventLogo size="lg" />
                 </div>
               </div>
               
+              {/* News Ticker Overlay in Fullscreen */}
+              {isFullscreen && (
+                <div className="absolute bottom-0 left-0 right-0 z-50 bg-black/40 backdrop-blur-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
+                  <div className="flex h-10 bg-[#0a192f] border-t border-white/5">
+                     <div className="bg-[#f0b429] px-4 flex items-center shrink-0 skew-x-[-15deg] ml-[-10px] z-10 border-r border-black/20">
+                        <span className="text-black font-black text-xs uppercase tracking-tighter skew-x-[15deg]">LIVE STREAM</span>
+                     </div>
+                     <div className="flex-1 overflow-hidden relative">
+                        <NewsTicker
+                          headlines={branding.globalTickerHeadlines.length > 0 ? branding.globalTickerHeadlines : ['Welcome!']}
+                          backgroundColor="transparent"
+                          textColor="#FFFFFF"
+                          speed={branding.globalTickerSpeed}
+                        />
+                     </div>
+                  </div>
+                </div>
+              )}
+              
               {/* Share button on mobile video */}
-              {isMobile && (
+              {isMobile && !isFullscreen && (
                 <button 
                   onClick={copyShareLink}
                   className="absolute top-4 right-4 bg-black/40 backdrop-blur-md p-2 rounded-full border border-white/10"
@@ -413,7 +448,7 @@ export default function PublicDisplayView() {
             </div>
 
             {/* Content Side Section */}
-            {!isLandscape && (
+            {!isLandscape && !isFullscreen && (
               <div className={`${isMobile ? 'flex-1 overflow-hidden' : 'w-[340px] border-l border-white/5 shadow-2xl'} flex flex-col bg-[#060b18]/40 backdrop-blur-3xl relative transition-all duration-300`}>
                 <div className="absolute inset-0 bg-gradient-to-b from-[#f0b429]/5 to-transparent pointer-events-none" />
                 
@@ -550,17 +585,17 @@ export default function PublicDisplayView() {
                          </div>
                       </section>
                     )}
-                  </div>
-                </div>
-              )}
-            </div>
-            )}
-          </>
-        )}
-      </main>
+                   </div>
+                 </div>
+               )}
+             </div>
+           )}
+         </div>
+       )}
+     </main>
 
       {/* Broadcaster News Tickers */}
-      {!isLandscape && (
+      {!isLandscape && !isFullscreen && (
         <div className="shrink-0 border-t border-white/10 z-40 bg-black shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
           <div className="flex h-12 bg-[#0a192f] items-stretch">
              <div className="bg-[#f0b429] px-6 flex items-center shrink-0 skew-x-[-15deg] ml-[-12px] z-10 border-r border-black/20 shadow-[5px_0_15px_rgba(0,0,0,0.3)]">
