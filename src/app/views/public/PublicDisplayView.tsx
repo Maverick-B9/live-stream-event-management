@@ -262,14 +262,37 @@ export default function PublicDisplayView() {
     return () => document.removeEventListener('fullscreenchange', handleFsChange);
   }, []);
 
+  useEffect(() => {
+    const checkOrientation = () => {
+      setIsMobile(window.innerWidth < 1024);
+      setIsLandscape(window.innerWidth > window.innerHeight);
+    };
+    checkOrientation();
+    window.addEventListener('resize', checkOrientation);
+    return () => window.removeEventListener('resize', checkOrientation);
+  }, []);
+
   const toggleFullscreen = () => {
     if (!broadcastRef.current) return;
     if (!document.fullscreenElement) {
-      broadcastRef.current.requestFullscreen().catch(err => {
+      broadcastRef.current.requestFullscreen().then(() => {
+        // Try to lock orientation to landscape on mobile when entering fullscreen
+        const screenAny = window.screen as any;
+        if (screenAny?.orientation?.lock) {
+          screenAny.orientation.lock('landscape').catch(() => {
+            // Silently fail if not supported (e.g. some iOS versions)
+          });
+        }
+      }).catch(err => {
         toast.error("Fullscreen error", { description: err.message });
       });
     } else {
-      document.exitFullscreen();
+      document.exitFullscreen().then(() => {
+        const screenAny = window.screen as any;
+        if (screenAny?.orientation?.unlock) {
+          screenAny.orientation.unlock();
+        }
+      });
     }
   };
 
