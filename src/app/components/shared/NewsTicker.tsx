@@ -21,31 +21,40 @@ export function NewsTicker({
   
   useEffect(() => {
     if (tickerRef.current) {
-      setTickerWidth(tickerRef.current.scrollWidth);
+      setTickerWidth(tickerRef.current.scrollWidth / 2);
     }
   }, [headlines]);
 
-  const tickerText = headlines.join('   •   ') + '   •   ';
+  // Combine items with a decorative separator
+  const tickerItems = [...headlines, ...headlines];
   const duration = tickerWidth / speed;
 
   return (
     <div 
-      className={`overflow-hidden ${className}`}
-      style={{ backgroundColor }}
+      className={`relative overflow-hidden group select-none ${className}`}
+      style={{ 
+        backgroundColor,
+        maskImage: 'linear-gradient(to right, transparent, black 15%, black 85%, transparent)',
+        WebkitMaskImage: 'linear-gradient(to right, transparent, black 15%, black 85%, transparent)'
+      }}
     >
       <motion.div
         ref={tickerRef}
-        className="whitespace-nowrap py-2"
+        className="flex whitespace-nowrap py-2"
         animate={{ x: [-tickerWidth, 0] }}
         transition={{
-          duration,
+          duration: duration || 20,
           repeat: Infinity,
           ease: 'linear',
         }}
         style={{ color: textColor }}
       >
-        <span className="inline-block px-4">{tickerText}</span>
-        <span className="inline-block px-4">{tickerText}</span>
+        {tickerItems.map((item, i) => (
+          <div key={i} className="flex items-center gap-4 px-6 shrink-0 font-['Rajdhani'] font-bold text-sm tracking-widest uppercase">
+            <span>{item}</span>
+            <div className="w-1.5 h-1.5 rounded-full bg-amber-500 opacity-50" />
+          </div>
+        ))}
       </motion.div>
     </div>
   );

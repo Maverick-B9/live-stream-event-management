@@ -112,23 +112,26 @@ function getSecondaryStats(
 
 // ── Score cell with flash animation ─────────────────────────────
 
-function ScoreCell({ value, live }: { value: string; live: boolean }) {
+function ScoreCell({ value, live, color }: { value: string; live: boolean; color?: string }) {
   const [scope, animate] = useAnimate();
   const prevValue = useRef(value);
 
   useEffect(() => {
     if (live && prevValue.current !== value) {
+      // Powerful pop animation with outer glow
       animate(scope.current, {
-        backgroundColor: ['rgba(245,158,11,0.6)', 'rgba(245,158,11,0)'],
-      }, { duration: 0.8 });
+        scale: [1, 1.4, 1],
+        color: ['#ffffff', '#fcd34d', '#ffffff'],
+        textShadow: ['0 0 0px transparent', `0 0 20px ${color || '#fcd34d'}`, '0 0 0px transparent'],
+      }, { duration: 0.6, ease: 'easeOut' });
     }
     prevValue.current = value;
-  }, [value, live, animate, scope]);
+  }, [value, live, animate, scope, color]);
 
   return (
     <motion.span
       ref={scope}
-      className="text-4xl font-bold px-2 rounded font-['Bebas_Neue'] tracking-wider text-white"
+      className="text-4xl font-bold px-2 rounded font-['Bebas_Neue'] tracking-wider text-white tabular-nums drop-shadow-lg"
     >
       {value}
     </motion.span>
@@ -166,13 +169,14 @@ export function MatchCard({
   if (variant === 'compact') {
     return (
       <motion.div
-        className="bg-gray-900 border border-gray-700 rounded-xl p-4 cursor-pointer min-w-[260px] relative"
+        className="bg-[#0e172c]/40 backdrop-blur-xl border border-white/10 rounded-2xl p-5 cursor-pointer min-w-[280px] relative overflow-hidden group shadow-2xl"
         animate={liveAnimation}
         transition={isLive ? { duration: 1.5, repeat: Infinity, repeatDelay: 2 } : {}}
-        whileHover={{ scale: 1.02 }}
+        whileHover={{ scale: 1.02, y: -2 }}
         onClick={onClick}
       >
-        <div className="flex items-center justify-between mb-2">
+        <div className="absolute inset-0 bg-gradient-to-tr from-[#f0b429]/5 to-transparent pointer-events-none" />
+        <div className="flex items-center justify-between mb-3 relative z-10">
           <div className="flex items-center gap-2">
             <SportIcon className="w-4 h-4 text-gray-400" />
             <div className="flex items-center gap-1.5">
@@ -202,9 +206,9 @@ export function MatchCard({
             >
               {franchiseA.shortCode?.slice(0, 2) || franchiseA.name[0]}
             </div>
-            <span className="text-white text-base font-bold tracking-wide truncate">{franchiseA.name}</span>
+            <span className="text-white text-base font-bold tracking-tight truncate font-['Rajdhani']">{franchiseA.name}</span>
           </div>
-          <ScoreCell value={primaryA} live={isLive} />
+          <ScoreCell value={primaryA} live={isLive} color={franchiseA.color} />
         </div>
 
         <div className="flex items-center justify-between mt-1.5">
@@ -220,9 +224,9 @@ export function MatchCard({
             >
               {franchiseB.shortCode?.slice(0, 2) || franchiseB.name[0]}
             </div>
-            <span className="text-white text-base font-bold tracking-wide truncate">{franchiseB.name}</span>
+            <span className="text-white text-base font-bold tracking-tight truncate font-['Rajdhani']">{franchiseB.name}</span>
           </div>
-          <ScoreCell value={primaryB} live={isLive} />
+          <ScoreCell value={primaryB} live={isLive} color={franchiseB.color} />
         </div>
 
         {match.currentPeriod && (
