@@ -251,13 +251,18 @@ export default function PublicDisplayView() {
   const [filter, setFilter] = useState<'all' | 'cricket' | 'football'>('all');
   const [activeTab, setActiveTab] = useState<'live' | 'scorecard' | 'upcoming' | 'info'>('live');
   const [isMobile, setIsMobile] = useState(false);
+  const [isLandscape, setIsLandscape] = useState(false);
   const prevStatusesRef = useRef<Record<string, string>>({});
 
   useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 1024);
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
+    const checkLayout = () => {
+      const mobile = window.innerWidth < 1024;
+      setIsMobile(mobile);
+      setIsLandscape(window.innerWidth > window.innerHeight && mobile);
+    };
+    checkLayout();
+    window.addEventListener('resize', checkLayout);
+    return () => window.removeEventListener('resize', checkLayout);
   }, []);
 
   useEffect(() => {
@@ -337,7 +342,7 @@ export default function PublicDisplayView() {
       </AnimatePresence>
 
       {/* Top bar (Desktop only) */}
-      {!isMobile && (
+      {!isMobile && !isLandscape && (
         <div className="flex items-center justify-between px-8 py-3 border-b border-white/5 z-10 shrink-0 bg-[#060b18]/60 backdrop-blur-xl relative">
           <div className="flex items-center gap-3">
             <EventLogo size="sm" />
@@ -364,7 +369,7 @@ export default function PublicDisplayView() {
       )}
 
       {/* Main content */}
-      <main className={`flex-1 w-full flex ${isMobile ? 'flex-col' : 'flex-row'} overflow-hidden relative z-10`}>
+      <main className={`flex-1 w-full flex ${isMobile && !isLandscape ? 'flex-col' : 'flex-row'} overflow-hidden relative z-10`}>
         {soonMatch && soonFranchiseA && soonFranchiseB && !activeStreamUrl ? (
           <div className="w-full h-full">
             <CountdownWidget match={soonMatch} franchiseA={soonFranchiseA} franchiseB={soonFranchiseB} />
@@ -408,10 +413,11 @@ export default function PublicDisplayView() {
             </div>
 
             {/* Content Side Section */}
-            <div className={`${isMobile ? 'flex-1 overflow-hidden' : 'w-[400px] border-l border-white/5 shadow-2xl'} flex flex-col bg-[#060b18]/40 backdrop-blur-3xl relative`}>
-              <div className="absolute inset-0 bg-gradient-to-b from-[#f0b429]/5 to-transparent pointer-events-none" />
-              
-              {isMobile ? (
+            {!isLandscape && (
+              <div className={`${isMobile ? 'flex-1 overflow-hidden' : 'w-[340px] border-l border-white/5 shadow-2xl'} flex flex-col bg-[#060b18]/40 backdrop-blur-3xl relative transition-all duration-300`}>
+                <div className="absolute inset-0 bg-gradient-to-b from-[#f0b429]/5 to-transparent pointer-events-none" />
+                
+                {isMobile ? (
                 /* Mobile Tabbed Interface */
                 <div className="flex flex-col h-full relative z-10">
                   <div className="flex border-b border-white/5 overflow-x-auto no-scrollbar shrink-0 bg-black/20">
@@ -548,39 +554,42 @@ export default function PublicDisplayView() {
                 </div>
               )}
             </div>
+            )}
           </>
         )}
       </main>
 
       {/* Broadcaster News Tickers */}
-      <div className="shrink-0 border-t border-white/10 z-40 bg-black shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
-        <div className="flex h-12 bg-[#0a192f] items-stretch">
-           <div className="bg-[#f0b429] px-6 flex items-center shrink-0 skew-x-[-15deg] ml-[-12px] z-10 border-r border-black/20 shadow-[5px_0_15px_rgba(0,0,0,0.3)]">
-              <span className="text-black font-black text-sm uppercase tracking-tighter skew-x-[15deg]">MAHADASARA 2026</span>
-           </div>
-           <div className="flex-1 overflow-hidden relative">
-              <NewsTicker
-                headlines={branding.globalTickerHeadlines.length > 0 ? branding.globalTickerHeadlines : ['Welcome to the event!']}
-                backgroundColor="transparent"
-                textColor="#FFFFFF"
-                speed={branding.globalTickerSpeed}
-              />
-           </div>
+      {!isLandscape && (
+        <div className="shrink-0 border-t border-white/10 z-40 bg-black shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
+          <div className="flex h-12 bg-[#0a192f] items-stretch">
+             <div className="bg-[#f0b429] px-6 flex items-center shrink-0 skew-x-[-15deg] ml-[-12px] z-10 border-r border-black/20 shadow-[5px_0_15px_rgba(0,0,0,0.3)]">
+                <span className="text-black font-black text-sm uppercase tracking-tighter skew-x-[15deg]">MAHADASARA 2026</span>
+             </div>
+             <div className="flex-1 overflow-hidden relative">
+                <NewsTicker
+                  headlines={branding.globalTickerHeadlines.length > 0 ? branding.globalTickerHeadlines : ['Welcome to the event!']}
+                  backgroundColor="transparent"
+                  textColor="#FFFFFF"
+                  speed={branding.globalTickerSpeed}
+                />
+             </div>
+          </div>
+          <div className="flex h-8 bg-black items-stretch">
+             <div className="bg-red-600 px-6 flex items-center shrink-0 skew-x-[-15deg] ml-[-8px] z-10">
+                <span className="text-white text-[10px] font-black uppercase tracking-widest skew-x-[15deg]">LATEST UPDATES</span>
+             </div>
+             <div className="flex-1 overflow-hidden">
+                <NewsTicker
+                  headlines={effectiveTicker.length > 0 ? effectiveTicker : branding.globalTickerHeadlines}
+                  backgroundColor="transparent"
+                  textColor={branding.secondaryColor}
+                  speed={Math.max(30, branding.globalTickerSpeed - 10)}
+                />
+             </div>
+          </div>
         </div>
-        <div className="flex h-8 bg-black items-stretch">
-           <div className="bg-red-600 px-6 flex items-center shrink-0 skew-x-[-15deg] ml-[-8px] z-10">
-              <span className="text-white text-[10px] font-black uppercase tracking-widest skew-x-[15deg]">LATEST UPDATES</span>
-           </div>
-           <div className="flex-1 overflow-hidden">
-              <NewsTicker
-                headlines={effectiveTicker.length > 0 ? effectiveTicker : branding.globalTickerHeadlines}
-                backgroundColor="transparent"
-                textColor={branding.secondaryColor}
-                speed={Math.max(30, branding.globalTickerSpeed - 10)}
-              />
-           </div>
-        </div>
-      </div>
+      )}
     </div>
   );
 }
